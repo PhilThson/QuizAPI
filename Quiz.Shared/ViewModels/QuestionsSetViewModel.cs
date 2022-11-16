@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Quiz.Shared.ViewModels
 {
 	public class QuestionsSetViewModel
 	{
 		public int  Id { get; set; }
+        [Required]
+        [MaxLength(2048)]
         [DisplayName("Opis umiejętności")]
         public string SkillDescription { get; set; }
         [DisplayName("Obszar zestawu pytań")]

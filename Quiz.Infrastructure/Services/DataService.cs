@@ -106,6 +106,21 @@ namespace Quiz.Infrastructure.Services
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
 
+        public async Task<AttachmentFileViewModel> GetAttachmentById(int id) =>
+            await _dbContext.KartyPracy
+            .Where(k => k.Id == id)
+            .Select(k => new AttachmentFileViewModel
+            {
+                Id = k.Id,
+                Name = k.Nazwa,
+                Content = k.Zawartosc,
+                ContentType = k.RodzajZawartosci,
+                Size = k.Rozmiar
+            })
+            .FirstOrDefaultAsync()
+            ?? throw new DataNotFoundException();
+
+        #region Question
         public async Task<IEnumerable<QuestionViewModel>> GetAllQuestions() =>
             await _dbContext.Pytania
             .Select(p => new QuestionViewModel
@@ -130,36 +145,47 @@ namespace Quiz.Infrastructure.Services
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
 
-        public async Task<AttachmentFileViewModel> GetAttachmentById(int id) =>
-            await _dbContext.KartyPracy
-            .Where(k => k.Id == id)
-            .Select(k => new AttachmentFileViewModel
-            {
-                Id = k.Id,
-                Name = k.Nazwa,
-                Content = k.Zawartosc,
-                ContentType = k.RodzajZawartosci,
-                Size = k.Rozmiar
-            })
-            .FirstOrDefaultAsync()
-            ?? throw new DataNotFoundException();
-
-
-        public async Task<Pytanie> AddQuestion(QuestionViewModel questionVM)
+        public async Task<QuestionViewModel> AddQuestion(QuestionViewModel questionVM)
         {
+            if (questionVM.QuestionsSetId == default(int))
+                throw new DataValidationException();
+
             var question = new Pytanie
             {
                 Tresc = questionVM.Content,
                 Opis = questionVM.Description,
-                ZestawPytanId = questionVM.QuestionsSetId.Value
+                ZestawPytanId = questionVM.QuestionsSetId != default(int) ?
+                    questionVM.QuestionsSetId : throw new DataValidationException()
             };
 
             await _dbContext.Pytania.AddAsync(question);
             await _dbContext.SaveChangesAsync();
 
-            return question;
+            return await GetQuestionById(question.Id);
         }
 
+        public async Task<QuestionViewModel> UpdateQuestion(QuestionViewModel questionVM)
+        {
+            if (questionVM.QuestionsSetId == default(int))
+                throw new DataValidationException();
+
+            var questionFromDb = await _dbContext.Pytania
+                .FirstOrDefaultAsync(p => p.Id == questionVM.Id);
+
+            _ = questionFromDb ?? throw new DataNotFoundException();
+
+            questionFromDb.Tresc = questionVM.Content;
+            questionFromDb.Opis = questionVM.Description;
+            questionFromDb.ZestawPytanId = questionVM.QuestionsSetId;
+
+            _dbContext.Pytania.Attach(questionFromDb);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetQuestionById(questionFromDb.Id);
+        }
+        #endregion
+
+        #region QuestionsSet
         public async Task<ZestawPytan> AddQuestionsSet(
             QuestionsSetViewModel questionsSetVM)
         {
@@ -171,8 +197,110 @@ namespace Quiz.Infrastructure.Services
                     (questionsSetVM.Difficulty)
             };
 
+            _dbContext.ZestawyPytan.Add(questionsSet);
+            await _dbContext.SaveChangesAsync();
+
             return questionsSet;
         }
+        #endregion
+
+        #region SkillDescription
+        public async Task<string> UpdateSkillDescription(int id, string value)
+        {
+            var questionsSetFromDb = await _dbContext.ZestawyPytan
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            _ = questionsSetFromDb ?? throw new DataNotFoundException();
+
+            questionsSetFromDb.OpisUmiejetnosci = value;
+
+            await _dbContext.SaveChangesAsync();
+
+            return questionsSetFromDb.OpisUmiejetnosci;
+        }
+        #endregion
+
+        #region QuestionsSet Area
+        public async Task<IEnumerable<AreaViewModel>> GetAllAreas() =>
+            await _dbContext.ObszaryZestawowPytan
+            .Select(o => new AreaViewModel
+            {
+                Id = o.Id,
+                Name = o.Nazwa,
+                Description = o.Opis,
+                ExtendedName = o.NazwaRozszerzona
+            })
+            .ToListAsync();
+
+        public async Task<AreaViewModel> GetAreaById(byte id) =>
+            await _dbContext.ObszaryZestawowPytan
+            .Where(o => o.Id == id)
+            .Select(o => new AreaViewModel
+            {
+                Id = o.Id,
+                Name = o.Nazwa,
+                Description = o.Opis,
+                ExtendedName = o.NazwaRozszerzona
+            })
+            .FirstOrDefaultAsync()
+            ?? throw new DataNotFoundException();
+
+        public async Task<AreaViewModel> UpdateArea(AreaViewModel areaVM)
+        {
+            var areaFromDb = await _dbContext.ObszaryZestawowPytan
+                .FirstOrDefaultAsync(p => p.Id == areaVM.Id);
+
+            _ = areaFromDb ?? throw new DataNotFoundException();
+
+            areaFromDb.Nazwa = areaVM.Name;
+            areaFromDb.Opis = areaVM.Description;
+            areaFromDb.NazwaRozszerzona = areaVM.ExtendedName;
+
+            await _dbContext.SaveChangesAsync();
+
+            return await GetAreaById(areaFromDb.Id);
+        }
+        #endregion
+
+        #region Difficulty
+        public async Task<IEnumerable<DifficultyViewModel>> GetAllDifficulties() =>
+            await _dbContext.SkaleTrudnosci
+            .Select(s => new DifficultyViewModel
+            {
+                Id = s.Id,
+                Name = s.Nazwa,
+                Description = s.Opis
+            })
+            .ToListAsync();
+
+        public async Task<DifficultyViewModel> GetDifficultyById(byte id) =>
+            await _dbContext.SkaleTrudnosci
+            .Where(s => s.Id == id)
+            .Select(s => new DifficultyViewModel
+            {
+                Id = s.Id,
+                Name = s.Nazwa,
+                Description = s.Opis
+            })
+            .FirstOrDefaultAsync()
+            ?? throw new DataNotFoundException();
+
+        public async Task<DifficultyViewModel> UpdateDifficulty(
+            DifficultyViewModel difficultyVM)
+        {
+            var difficultyFromDb = await _dbContext.SkaleTrudnosci
+                .FirstOrDefaultAsync(p => p.Id == difficultyVM.Id);
+
+            _ = difficultyFromDb ?? throw new DataNotFoundException();
+
+            difficultyFromDb.Nazwa = difficultyVM.Name;
+            difficultyFromDb.Opis = difficultyVM.Description;
+
+            await _dbContext.SaveChangesAsync();
+
+            return await GetDifficultyById(difficultyFromDb.Id);
+        }
+        #endregion
 
         private async Task<TKey> GetObjectId<T, TKey>(string name)
             where T : BaseDictionaryEntity<TKey> =>

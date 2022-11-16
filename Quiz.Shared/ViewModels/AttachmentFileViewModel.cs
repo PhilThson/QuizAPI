@@ -14,5 +14,10 @@ namespace Quiz.Shared.ViewModels
         public string ContentType { get; set; }
         [DisplayName("Wielkość")]
         public long Size { get; set; }
+
+        public void Validate()
+        {
+
+        }
     }
 }

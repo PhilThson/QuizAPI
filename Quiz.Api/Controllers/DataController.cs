@@ -47,7 +47,7 @@ namespace Quiz.Api.Controllers
         }
 
         [HttpGet("pytania/{id}", Name = nameof(GetQuestionById))]
-        public async Task<IActionResult> GetQuestionById([FromQuery] int id)
+        public async Task<IActionResult> GetQuestionById([FromRoute] int id)
         {
             try
             {
@@ -61,19 +61,33 @@ namespace Quiz.Api.Controllers
         }
 
         [HttpPost("pytania")]
-        public async Task<IActionResult> CreateQuestion(QuestionViewModel pytanieVM)
+        public async Task<IActionResult> CreateQuestion(QuestionViewModel questionVM)
         {
             try
             {
-                var question = await _dataService.AddQuestion(pytanieVM);
+                if (questionVM.Id.HasValue)
+                    return BadRequest("Przesłany obiekt nie może posiadać identyfikatora");
+
+                var question = await _dataService.AddQuestion(questionVM);
 
                 return CreatedAtRoute(nameof(GetQuestionById),
                     new { id = question.Id}, question);
             }
-            catch(DataNotFoundException e)
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (Exception e) { return BadRequest(); }
+        }
+
+        [HttpPut("pytania")]
+        public async Task<IActionResult> UpdateQuestion(QuestionViewModel questionVM)
+        {
+            try
             {
-                return BadRequest();
+                var question = await _dataService.UpdateQuestion(questionVM);
+                return Ok(question);
             }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(); }
         }
         #endregion
 
@@ -82,7 +96,6 @@ namespace Quiz.Api.Controllers
         public async Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets()
         {
             var questionsSets = await _dataService.GetAllQuestionsSets();
-
             return questionsSets;
         }
 
@@ -98,6 +111,69 @@ namespace Quiz.Api.Controllers
             {
                 return NotFound();
             }
+        }
+
+        [HttpPatch("zestawyPytan/{id}/skill")]
+        public async Task<IActionResult> UpdateSkill([FromRoute] int id,
+            [FromBody] string value)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(value) || value.Length > 2048)
+                    return BadRequest("Przesłano nieprawidłowy model");
+
+                var updated = await _dataService.UpdateSkillDescription(id, value);
+                return Ok(updated);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(); }
+        }
+        #endregion
+
+        #region Obszary zestawu pytań
+        [HttpGet("obszary")]
+        public async Task<IEnumerable<AreaViewModel>> GetAllAreas()
+        {
+            var areas = await _dataService.GetAllAreas();
+            return areas;
+        }
+
+        [HttpPut("obszary")]
+        public async Task<IActionResult> UpdateArea([FromBody] AreaViewModel areaVM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            try
+            {
+                var updated = await _dataService.UpdateArea(areaVM);
+                return Ok(updated);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(); }
+        }
+        #endregion
+
+        #region Skale trudności
+        [HttpGet("skaleTrudnosci")]
+        public async Task<IEnumerable<DifficultyViewModel>> GetAllDifficulties()
+        {
+            var difficulties = await _dataService.GetAllDifficulties();
+            return difficulties;
+        }
+
+        [HttpPut("skaleTrudnosci")]
+        public async Task<IActionResult> UpdateDifficulty([FromBody]
+            DifficultyViewModel difficultyVM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            try
+            {
+                var updated = await _dataService.UpdateDifficulty(difficultyVM);
+                return Ok(updated);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(); }
         }
         #endregion
 
