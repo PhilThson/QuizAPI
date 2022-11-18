@@ -16,9 +16,9 @@ namespace Quiz.Shared.ViewModels
         [DisplayName("Skala trudności")]
         public string Difficulty { get; set; }
         [DisplayName("Oceny zestawu pytań")]
-        public string[] QuestionsSetRatings { get; set; }
+        public IEnumerable<RatingViewModel> QuestionsSetRatings { get; set; }
         [DisplayName("Pytania")]
-        public List<QuestionViewModel> Questions { get; set; }
+        public IEnumerable<QuestionViewModel> Questions { get; set; }
         [DisplayName("Dołączony plik - Karta pracy")]
         public AttachmentFileViewModel AttachmentFile { get; set; }
     }

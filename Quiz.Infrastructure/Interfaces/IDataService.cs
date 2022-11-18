@@ -24,5 +24,7 @@ namespace Quiz.Infrastructure.Interfaces
         Task<DifficultyViewModel> GetDifficultyById(byte id);
         Task<DifficultyViewModel> UpdateDifficulty(
             DifficultyViewModel difficultyVM);
+        Task<RatingViewModel> GetRatingById(int id);
+        Task<RatingViewModel> UpdateRating(RatingViewModel ratingVM);
     }
 }

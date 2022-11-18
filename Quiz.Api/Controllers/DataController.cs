@@ -177,6 +177,33 @@ namespace Quiz.Api.Controllers
         }
         #endregion
 
+        #region Oceny zestawu pytań
+        [HttpGet("ocenyZestawuPytan/{id}")]
+        public async Task<IActionResult> GetRatingById([FromRoute] int id)
+        {
+            try
+            {
+                var rating = await _dataService.GetRatingById(id);
+                return Ok(rating);
+            }
+            catch (DataNotFoundException e) { return NotFound(); }
+        }
+
+        [HttpPut("ocenyZestawuPytan")]
+        public async Task<IActionResult> UpdateRating([FromBody] RatingViewModel ratingVM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            try
+            {
+                var updated = await _dataService.UpdateRating(ratingVM);
+                return Ok(updated);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(); }
+        }
+        #endregion
+
         #region Karty pracy
         [HttpGet("kartyPracy/{id}", Name = nameof(GetAttachmentById))]
         public async Task<IActionResult> GetAttachmentById([FromRoute] int id)

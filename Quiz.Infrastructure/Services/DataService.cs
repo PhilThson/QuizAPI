@@ -45,6 +45,7 @@ namespace Quiz.Infrastructure.Services
             })
             .ToListAsync();
 
+        #region QuestionsSet
         public async Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets() =>
             await _dbContext.ZestawyPytan.Select(z => new QuestionsSetViewModel
             {
@@ -54,7 +55,8 @@ namespace Quiz.Infrastructure.Services
                 Difficulty = z.SkalaTrudnosci.Nazwa,
                 Questions = new List<QuestionViewModel>
                     (
-                        z.ZestawPytanPytania.Select(p => new QuestionViewModel
+                        z.ZestawPytanPytania
+                        .Select(p => new QuestionViewModel
                         {
                             Id = p.Id,
                             Content = p.Tresc,
@@ -62,8 +64,16 @@ namespace Quiz.Infrastructure.Services
                             QuestionsSetId = p.ZestawPytanId
                         })
                     ),
-                QuestionsSetRatings = z.ZestawPytanOceny
-                        .Select(o => o.OpisOceny).ToArray(),
+                QuestionsSetRatings = new List<RatingViewModel>
+                    (
+                        z.ZestawPytanOceny
+                        .Select(o => new RatingViewModel
+                        {
+                            Id = o.Id,
+                            RatingDescription = o.OpisOceny,
+                            QuestionsSetId = o.ZestawPytanId
+                        })
+                    ),
                 AttachmentFile = new AttachmentFileViewModel
                 {
                     Id = z.KartaPracy.Id,
@@ -93,8 +103,16 @@ namespace Quiz.Infrastructure.Services
                         QuestionsSetId = p.ZestawPytanId
                     })
                 ),
-                QuestionsSetRatings = z.ZestawPytanOceny
-                    .Select(o => o.OpisOceny).ToArray(),
+                QuestionsSetRatings = new List<RatingViewModel>
+                    (
+                        z.ZestawPytanOceny
+                        .Select(o => new RatingViewModel
+                        {
+                            Id = o.Id,
+                            RatingDescription = o.OpisOceny,
+                            QuestionsSetId = o.ZestawPytanId
+                        })
+                    ),
                 AttachmentFile = new AttachmentFileViewModel
                 {
                     Id = z.KartaPracy.Id,
@@ -105,6 +123,7 @@ namespace Quiz.Infrastructure.Services
             })
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
+        #endregion
 
         public async Task<AttachmentFileViewModel> GetAttachmentById(int id) =>
             await _dbContext.KartyPracy
@@ -293,6 +312,10 @@ namespace Quiz.Infrastructure.Services
 
             _ = difficultyFromDb ?? throw new DataNotFoundException();
 
+            if (difficultyFromDb.Nazwa == difficultyVM.Name &&
+                difficultyFromDb.Opis == difficultyVM.Description)
+                return difficultyVM;
+
             difficultyFromDb.Nazwa = difficultyVM.Name;
             difficultyFromDb.Opis = difficultyVM.Description;
 
@@ -302,11 +325,42 @@ namespace Quiz.Infrastructure.Services
         }
         #endregion
 
+        #region Rating
+        public async Task<RatingViewModel> GetRatingById(int id) =>
+            await _dbContext.OcenyZestawowPytan
+                .Where(o => o.Id == id)
+                .Select(o => new RatingViewModel
+                {
+                    Id = o.Id,
+                    RatingDescription = o.OpisOceny,
+                    QuestionsSetId = o.ZestawPytanId
+                })
+                .FirstOrDefaultAsync()
+                ?? throw new DataNotFoundException();
+    
+        public async Task<RatingViewModel> UpdateRating(RatingViewModel ratingVM)
+        {
+            var ratingFromDb = await _dbContext.OcenyZestawowPytan
+                .FirstOrDefaultAsync(p => p.Id == ratingVM.Id);
+
+            _ = ratingFromDb ?? throw new DataNotFoundException();
+            if (ratingFromDb.OpisOceny == ratingVM.RatingDescription)
+                return ratingVM;
+
+            ratingFromDb.OpisOceny = ratingVM.RatingDescription;
+            await _dbContext.SaveChangesAsync();
+
+            return await GetRatingById(ratingFromDb.Id);
+        }
+        #endregion
+
+        #region Private Methods
         private async Task<TKey> GetObjectId<T, TKey>(string name)
             where T : BaseDictionaryEntity<TKey> =>
             await _dbContext.Set<T>()
                 .Where(e => e.Nazwa == name)
                 .Select(e => e.Id)
                 .FirstOrDefaultAsync() ?? throw new DataNotFoundException();
+        #endregion
     }
 }
