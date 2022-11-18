@@ -107,22 +107,53 @@ namespace Quiz.Api.Controllers
                 var questionsSet = await _dataService.GetQuestionsSetById(id);
                 return Ok(questionsSet);
             }
-            catch (DataNotFoundException e)
-            {
-                return NotFound();
-            }
+            catch (DataNotFoundException e) { return NotFound(); }
+            catch (Exception e) { return BadRequest(); }
         }
 
-        [HttpPatch("zestawyPytan/{id}/skill")]
+        [HttpPatch("zestawyPytan/{id}")]
         public async Task<IActionResult> UpdateSkill([FromRoute] int id,
-            [FromBody] string value)
+            [FromQuery] string skill)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(value) || value.Length > 2048)
+                if (string.IsNullOrWhiteSpace(skill) || skill.Length > 2048)
                     return BadRequest("Przesłano nieprawidłowy model");
 
-                var updated = await _dataService.UpdateSkillDescription(id, value);
+                var updated = await _dataService.UpdateSkillDescription(id, skill);
+                return Ok(updated);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(); }
+        }
+
+        [HttpPatch("zestawyPytan/{id}")]
+        public async Task<IActionResult> UpdateQuestionsSetArea([FromRoute] int id,
+            [FromQuery] byte areaId)
+        {
+            try
+            {
+                if (areaId == default(byte))
+                    return BadRequest("Przesłano nieprawidłowy model");
+
+                var updated = await _dataService.UpdateQuestionsSetArea(id, areaId);
+                return Ok(updated);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(); }
+        }
+
+        [HttpPatch("zestawyPytan/{id}")]
+        public async Task<IActionResult> UpdateQuestionsSetDifficulty(
+            [FromRoute] int id, [FromQuery] byte difficultyId)
+        {
+            try
+            {
+                if (difficultyId == default(byte))
+                    return BadRequest("Przesłano nieprawidłowy model");
+
+                var updated = await _dataService.UpdateQuestionsSetDifficulty(id,
+                    difficultyId);
                 return Ok(updated);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
@@ -136,6 +167,18 @@ namespace Quiz.Api.Controllers
         {
             var areas = await _dataService.GetAllAreas();
             return areas;
+        }
+
+        [HttpGet("obszary/{id}")]
+        public async Task<IActionResult> GetAreaById(byte id)
+        {
+            try
+            {
+                var area = await _dataService.GetAreaById(id);
+                return Ok(area);
+            }
+            catch (DataNotFoundException e) { return NotFound(); }
+            catch (Exception e) { return BadRequest(); }
         }
 
         [HttpPut("obszary")]
@@ -159,6 +202,18 @@ namespace Quiz.Api.Controllers
         {
             var difficulties = await _dataService.GetAllDifficulties();
             return difficulties;
+        }
+
+        [HttpGet("skaleTrudnosci/{id}")]
+        public async Task<IActionResult> GetDifficultyById(byte id)
+        {
+            try
+            {
+                var difficulty = await _dataService.GetDifficultyById(id);
+                return Ok(difficulty);
+            }
+            catch (DataNotFoundException e) { return NotFound(); }
+            catch (Exception e) { return BadRequest(); }
         }
 
         [HttpPut("skaleTrudnosci")]
@@ -187,6 +242,7 @@ namespace Quiz.Api.Controllers
                 return Ok(rating);
             }
             catch (DataNotFoundException e) { return NotFound(); }
+            catch (Exception e) { return BadRequest(); }
         }
 
         [HttpPut("ocenyZestawuPytan")]

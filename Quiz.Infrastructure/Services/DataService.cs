@@ -123,8 +123,36 @@ namespace Quiz.Infrastructure.Services
             })
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
+
+        public async Task<ZestawPytan> AddQuestionsSet(
+            QuestionsSetViewModel questionsSetVM)
+        {
+            var questionsSet = new ZestawPytan
+            {
+                ObszarZestawuPytanId = await GetObjectId<ObszarZestawuPytan, byte>
+                    (questionsSetVM.Area),
+                SkalaTrudnosciId = await GetObjectId<SkalaTrudnosci, byte>
+                    (questionsSetVM.Difficulty)
+            };
+
+            _dbContext.ZestawyPytan.Add(questionsSet);
+            await _dbContext.SaveChangesAsync();
+
+            return questionsSet;
+        }
+
+        public Task<AreaViewModel> UpdateQuestionsSetArea(int id, byte areaId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DifficultyViewModel> UpdateQuestionsSetDifficulty(int id, byte difficultyId)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
 
+        #region Attachment
         public async Task<AttachmentFileViewModel> GetAttachmentById(int id) =>
             await _dbContext.KartyPracy
             .Where(k => k.Id == id)
@@ -138,6 +166,7 @@ namespace Quiz.Infrastructure.Services
             })
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
+        #endregion
 
         #region Question
         public async Task<IEnumerable<QuestionViewModel>> GetAllQuestions() =>
@@ -204,34 +233,18 @@ namespace Quiz.Infrastructure.Services
         }
         #endregion
 
-        #region QuestionsSet
-        public async Task<ZestawPytan> AddQuestionsSet(
-            QuestionsSetViewModel questionsSetVM)
-        {
-            var questionsSet = new ZestawPytan
-            {
-                ObszarZestawuPytanId = await GetObjectId<ObszarZestawuPytan, byte>
-                    (questionsSetVM.Area),
-                SkalaTrudnosciId = await GetObjectId<SkalaTrudnosci, byte>
-                    (questionsSetVM.Difficulty)
-            };
-
-            _dbContext.ZestawyPytan.Add(questionsSet);
-            await _dbContext.SaveChangesAsync();
-
-            return questionsSet;
-        }
-        #endregion
-
         #region SkillDescription
-        public async Task<string> UpdateSkillDescription(int id, string value)
+        public async Task<string> UpdateSkillDescription(int id, string skill)
         {
             var questionsSetFromDb = await _dbContext.ZestawyPytan
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             _ = questionsSetFromDb ?? throw new DataNotFoundException();
 
-            questionsSetFromDb.OpisUmiejetnosci = value;
+            if (questionsSetFromDb.OpisUmiejetnosci == skill)
+                return questionsSetFromDb.OpisUmiejetnosci;
+
+            questionsSetFromDb.OpisUmiejetnosci = skill;
 
             await _dbContext.SaveChangesAsync();
 

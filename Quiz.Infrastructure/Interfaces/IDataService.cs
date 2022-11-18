@@ -9,6 +9,9 @@ namespace Quiz.Infrastructure.Interfaces
         Task<IEnumerable<StudentViewModel>> GetAllStudents();
         Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets();
         Task<QuestionsSetViewModel> GetQuestionsSetById(int id);
+        Task<AreaViewModel> UpdateQuestionsSetArea(int id, byte areaId);
+        Task<DifficultyViewModel> UpdateQuestionsSetDifficulty(int id,
+            byte difficultyId);
         Task<IEnumerable<QuestionViewModel>> GetAllQuestions();
         Task<QuestionViewModel> GetQuestionById(int id);
         Task<AttachmentFileViewModel> GetAttachmentById(int id);
