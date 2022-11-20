@@ -1,4 +1,5 @@
-﻿using Quiz.Data.Models.Base;
+﻿using System.Text.Json.Serialization;
+using Quiz.Data.Models.Base;
 
 namespace Quiz.Data.Models
 {
@@ -9,6 +10,7 @@ namespace Quiz.Data.Models
             SkalaTrudnosciZestawyPytan = new HashSet<ZestawPytan>();
         }
 
+        [JsonIgnore]
         public virtual ICollection<ZestawPytan> SkalaTrudnosciZestawyPytan
         { get; set; }
     }

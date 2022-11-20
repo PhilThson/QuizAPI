@@ -6,7 +6,7 @@ namespace Quiz.Shared.ViewModels
 {
 	public class QuestionViewModel
 	{
-		public int? Id { get; set; }
+		public int Id { get; set; }
         [Required]
         [MaxLength(2048)]
         [DisplayName("Treść")]

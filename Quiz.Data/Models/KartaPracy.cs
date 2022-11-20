@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Quiz.Data.Models.Base;
 
 namespace Quiz.Data.Models
@@ -10,11 +11,15 @@ namespace Quiz.Data.Models
 		public byte[] Zawartosc { get; set; }
 
         [MaxLength(64)]
-        public string RodzajZawartosci { get; set; }
+        public string? RodzajZawartosci { get; set; }
 
         public long Rozmiar { get; set; }
 
-		[InverseProperty("KartaPracy")]
-		public virtual ZestawPytan KartaPracyZestawPytan { get; set; }
-	}
+        public int ZestawPytanId { get; set; }
+
+        [JsonIgnore]
+        [ForeignKey(nameof(ZestawPytanId))]
+        [InverseProperty("ZestawPytanKartyPracy")]
+        public virtual ZestawPytan ZestawPytan { get; set; }
+    }
 }

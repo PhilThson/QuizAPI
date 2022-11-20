@@ -9,6 +9,6 @@ namespace Quiz.Data.Models.Base
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public TKey Id { get; set; }
 
-        public bool CzyAktywny { get; set; } = true;
+        public bool CzyAktywny { get; set; }
     }
 }

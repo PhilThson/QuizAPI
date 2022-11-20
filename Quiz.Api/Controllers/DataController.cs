@@ -2,6 +2,7 @@
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure;
 using Quiz.Infrastructure.Interfaces;
+using Quiz.Shared.DTOs;
 using Quiz.Shared.ViewModels;
 
 namespace Quiz.Api.Controllers
@@ -61,11 +62,11 @@ namespace Quiz.Api.Controllers
         }
 
         [HttpPost("pytania")]
-        public async Task<IActionResult> CreateQuestion(QuestionViewModel questionVM)
+        public async Task<IActionResult> AddQuestion(QuestionViewModel questionVM)
         {
             try
             {
-                if (questionVM.Id.HasValue)
+                if (questionVM.Id != default(int))
                     return BadRequest("Przesłany obiekt nie może posiadać identyfikatora");
 
                 var question = await _dataService.AddQuestion(questionVM);
@@ -111,7 +112,22 @@ namespace Quiz.Api.Controllers
             catch (Exception e) { return BadRequest(); }
         }
 
-        [HttpPatch("zestawyPytan/{id}")]
+        [HttpPost("zestawyPytan")]
+        public async Task<IActionResult> AddQuestionsSet(
+            CreateQuestionsSetDto createQuestionsSet)
+        {
+            try
+            {
+                var createdQS = await _dataService.AddQuestionsSet(createQuestionsSet);
+                return CreatedAtRoute(nameof(GetQuestionsSetById),
+                    new { id = createdQS.Id }, createdQS);
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpPatch("zestawyPytan/{id}/skill")]
         public async Task<IActionResult> UpdateSkill([FromRoute] int id,
             [FromQuery] string skill)
         {
@@ -127,7 +143,7 @@ namespace Quiz.Api.Controllers
             catch (Exception e) { return BadRequest(); }
         }
 
-        [HttpPatch("zestawyPytan/{id}")]
+        [HttpPatch("zestawyPytan/{id}/area")]
         public async Task<IActionResult> UpdateQuestionsSetArea([FromRoute] int id,
             [FromQuery] byte areaId)
         {
@@ -143,7 +159,7 @@ namespace Quiz.Api.Controllers
             catch (Exception e) { return BadRequest(); }
         }
 
-        [HttpPatch("zestawyPytan/{id}")]
+        [HttpPatch("zestawyPytan/{id}/difficulty")]
         public async Task<IActionResult> UpdateQuestionsSetDifficulty(
             [FromRoute] int id, [FromQuery] byte difficultyId)
         {

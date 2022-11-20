@@ -1,5 +1,6 @@
 ﻿using Quiz.Data.Models.Base;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Quiz.Data.Models
 {
@@ -13,6 +14,7 @@ namespace Quiz.Data.Models
         [MaxLength(1024)]
         public string? NazwaRozszerzona { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<ZestawPytan> ObszarZestawuPytanZestawyPytan { get; set; }
     }
 }

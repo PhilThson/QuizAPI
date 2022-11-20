@@ -12,14 +12,14 @@ namespace Quiz.Shared.ViewModels
         [DisplayName("Opis umiejętności")]
         public string SkillDescription { get; set; }
         [DisplayName("Obszar zestawu pytań")]
-        public string Area { get; set; }
+        public AreaViewModel Area { get; set; }
         [DisplayName("Skala trudności")]
-        public string Difficulty { get; set; }
+        public DifficultyViewModel Difficulty { get; set; }
         [DisplayName("Oceny zestawu pytań")]
         public IEnumerable<RatingViewModel> QuestionsSetRatings { get; set; }
         [DisplayName("Pytania")]
         public IEnumerable<QuestionViewModel> Questions { get; set; }
-        [DisplayName("Dołączony plik - Karta pracy")]
-        public AttachmentFileViewModel AttachmentFile { get; set; }
+        [DisplayName("Dołączone pliki - Karty pracy")]
+        public IEnumerable<AttachmentViewModel> Attachments { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using Quiz.Data.Helpers;
 using Quiz.Data.Models;
 using Quiz.Data.Models.Base;
 using Quiz.Infrastructure.Interfaces;
+using Quiz.Shared.DTOs;
 using Quiz.Shared.ViewModels;
 
 namespace Quiz.Infrastructure.Services
@@ -51,8 +52,19 @@ namespace Quiz.Infrastructure.Services
             {
                 Id = z.Id,
                 SkillDescription = z.OpisUmiejetnosci,
-                Area = z.ObszarZestawuPytan.Nazwa,
-                Difficulty = z.SkalaTrudnosci.Nazwa,
+                Area = new AreaViewModel
+                {
+                    Id = z.ObszarZestawuPytan.Id,
+                    Name = z.ObszarZestawuPytan.Nazwa,
+                    ExtendedName = z.ObszarZestawuPytan.NazwaRozszerzona,
+                    Description = z.ObszarZestawuPytan.Opis
+                },
+                Difficulty = new DifficultyViewModel
+                {
+                    Id = z.SkalaTrudnosci.Id,
+                    Name = z.SkalaTrudnosci.Nazwa,
+                    Description = z.SkalaTrudnosci.Opis
+                },
                 Questions = new List<QuestionViewModel>
                     (
                         z.ZestawPytanPytania
@@ -74,13 +86,19 @@ namespace Quiz.Infrastructure.Services
                             QuestionsSetId = o.ZestawPytanId
                         })
                     ),
-                AttachmentFile = new AttachmentFileViewModel
-                {
-                    Id = z.KartaPracy.Id,
-                    Name = z.KartaPracy.Nazwa,
-                    ContentType = z.KartaPracy.RodzajZawartosci,
-                    Size = z.KartaPracy.Rozmiar
-                }
+                Attachments = new List<AttachmentViewModel>
+                    (
+                        z.ZestawPytanKartyPracy
+                        .Select(kp => new AttachmentViewModel
+                        {
+                            Id = kp.Id,
+                            Name = kp.Nazwa,
+                            Description = kp.Opis,
+                            ContentType = kp.RodzajZawartosci,
+                            Size = kp.Rozmiar,
+                            QuestionsSetId = kp.ZestawPytanId
+                        })
+                    )
             })
             .ToListAsync();
 
@@ -91,8 +109,19 @@ namespace Quiz.Infrastructure.Services
             {
                 Id = z.Id,
                 SkillDescription = z.OpisUmiejetnosci,
-                Area = z.ObszarZestawuPytan.Nazwa,
-                Difficulty = z.SkalaTrudnosci.Nazwa,
+                Area = new AreaViewModel
+                {
+                    Id = z.ObszarZestawuPytan.Id,
+                    Name = z.ObszarZestawuPytan.Nazwa,
+                    ExtendedName = z.ObszarZestawuPytan.NazwaRozszerzona,
+                    Description = z.ObszarZestawuPytan.Opis
+                },
+                Difficulty = new DifficultyViewModel
+                {
+                    Id = z.SkalaTrudnosci.Id,
+                    Name = z.SkalaTrudnosci.Nazwa,
+                    Description = z.SkalaTrudnosci.Opis
+                },
                 Questions = new List<QuestionViewModel>
                 (
                     z.ZestawPytanPytania.Select(p => new QuestionViewModel
@@ -113,42 +142,137 @@ namespace Quiz.Infrastructure.Services
                             QuestionsSetId = o.ZestawPytanId
                         })
                     ),
-                AttachmentFile = new AttachmentFileViewModel
-                {
-                    Id = z.KartaPracy.Id,
-                    Name = z.KartaPracy.Nazwa,
-                    ContentType = z.KartaPracy.RodzajZawartosci,
-                    Size = z.KartaPracy.Rozmiar
-                }
+                Attachments = new List<AttachmentViewModel>
+                    (
+                        z.ZestawPytanKartyPracy
+                        .Select(kp => new AttachmentViewModel
+                        {
+                            Id = kp.Id,
+                            Name = kp.Nazwa,
+                            Description = kp.Opis,
+                            ContentType = kp.RodzajZawartosci,
+                            Size = kp.Rozmiar,
+                            QuestionsSetId = kp.ZestawPytanId
+                        })
+                    )
             })
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
 
-        public async Task<ZestawPytan> AddQuestionsSet(
-            QuestionsSetViewModel questionsSetVM)
+        public async Task<QuestionsSetViewModel> AddQuestionsSet(
+            CreateQuestionsSetDto createQuestionsSet)
         {
+            if (createQuestionsSet.AreaId == default(byte) ||
+                createQuestionsSet.DifficultyId == default(byte))
+                throw new DataValidationException();
+
+            if (!_dbContext.ObszaryZestawowPytan
+                .Any(o => o.Id == createQuestionsSet.AreaId))
+                throw new DataNotFoundException("Nie znaleziono obszaru o podanym" +
+                    $"identyfikatorze ({createQuestionsSet.AreaId})");
+
+            if (!_dbContext.SkaleTrudnosci
+                .Any(o => o.Id == createQuestionsSet.DifficultyId))
+                throw new DataNotFoundException("Nie znaleziono skali trudności " +
+                    $"o podanym identyfikatorze ({createQuestionsSet.DifficultyId})");
+
             var questionsSet = new ZestawPytan
             {
-                ObszarZestawuPytanId = await GetObjectId<ObszarZestawuPytan, byte>
-                    (questionsSetVM.Area),
-                SkalaTrudnosciId = await GetObjectId<SkalaTrudnosci, byte>
-                    (questionsSetVM.Difficulty)
+                OpisUmiejetnosci = createQuestionsSet.SkillDescription,
+                ObszarZestawuPytanId = createQuestionsSet.AreaId,
+                SkalaTrudnosciId = createQuestionsSet.DifficultyId,
+                CzyAktywny = true
             };
-
-            _dbContext.ZestawyPytan.Add(questionsSet);
+            await _dbContext.AddAsync(questionsSet);
             await _dbContext.SaveChangesAsync();
 
-            return questionsSet;
+            if(createQuestionsSet.QuestionsSetRatings.Count() > 0)
+            {
+                var questionsSetRatings = new List<OcenaZestawuPytan>();
+                foreach (var rating in createQuestionsSet.QuestionsSetRatings)
+                {
+                    questionsSetRatings.Add(new OcenaZestawuPytan
+                    {
+                        OpisOceny = rating,
+                        ZestawPytanId = questionsSet.Id,
+                        CzyAktywny = true
+                    });
+                }
+                await _dbContext.AddRangeAsync(questionsSetRatings);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            if (createQuestionsSet.Questions?.Count() > 0)
+            {
+                var questions = new List<Pytanie>();
+                foreach (var question in createQuestionsSet.Questions)
+                    questions.Add(new Pytanie
+                    {
+                        Tresc = question.Content,
+                        Opis = question.Description,
+                        ZestawPytanId = questionsSet.Id,
+                        CzyAktywny = true
+                    });
+                await _dbContext.Pytania.AddRangeAsync(questions);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            if (createQuestionsSet.AttachmentFiles?.Count() > 0)
+            {
+                var attFiles = new List<KartaPracy>();
+                foreach(var attFile in createQuestionsSet.AttachmentFiles)
+                    attFiles.Add(new KartaPracy
+                    {
+                        Nazwa = attFile.Name,
+                        Opis = attFile.Description,
+                        RodzajZawartosci = attFile.ContentType,
+                        Zawartosc = attFile.Content,
+                        Rozmiar = attFile.Size,
+                        ZestawPytanId = questionsSet.Id,
+                        CzyAktywny = true
+                    });
+                await _dbContext.KartyPracy.AddRangeAsync(attFiles);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return await GetQuestionsSetById(questionsSet.Id);
         }
 
-        public Task<AreaViewModel> UpdateQuestionsSetArea(int id, byte areaId)
+        public async Task<AreaViewModel> UpdateQuestionsSetArea(int id, byte areaId)
         {
-            throw new NotImplementedException();
+            if (!_dbContext.ObszaryZestawowPytan.Any(o => o.Id == areaId))
+                throw new DataNotFoundException("Nie znaleziono obszaru o podanym" +
+                    $"identyfikatorze ({areaId})");
+
+            var questionsSetFromDb = await _dbContext.ZestawyPytan
+                .Where(z => z.Id == id)
+                .FirstOrDefaultAsync() ?? throw new DataNotFoundException();
+
+            if (questionsSetFromDb.ObszarZestawuPytanId == areaId)
+                return await GetAreaById(questionsSetFromDb.ObszarZestawuPytanId);
+
+            questionsSetFromDb.ObszarZestawuPytanId = areaId;
+            await _dbContext.SaveChangesAsync();
+            return await GetAreaById(areaId);
         }
 
-        public Task<DifficultyViewModel> UpdateQuestionsSetDifficulty(int id, byte difficultyId)
+        public async Task<DifficultyViewModel> UpdateQuestionsSetDifficulty(int id,
+            byte difficultyId)
         {
-            throw new NotImplementedException();
+            if (!_dbContext.SkaleTrudnosci.Any(o => o.Id == difficultyId))
+                throw new DataNotFoundException("Nie znaleziono skali trudności " +
+                    $"o podanym identyfikatorze ({difficultyId})");
+
+            var questionsSetFromDb = await _dbContext.ZestawyPytan
+                .Where(z => z.Id == id)
+                .FirstOrDefaultAsync() ?? throw new DataNotFoundException();
+
+            if (questionsSetFromDb.SkalaTrudnosciId == difficultyId)
+                return await GetDifficultyById(questionsSetFromDb.SkalaTrudnosciId);
+
+            questionsSetFromDb.SkalaTrudnosciId = difficultyId;
+            await _dbContext.SaveChangesAsync();
+            return await GetDifficultyById(difficultyId);
         }
         #endregion
 
@@ -160,6 +284,7 @@ namespace Quiz.Infrastructure.Services
             {
                 Id = k.Id,
                 Name = k.Nazwa,
+                Description = k.Opis,
                 Content = k.Zawartosc,
                 ContentType = k.RodzajZawartosci,
                 Size = k.Rozmiar
@@ -196,14 +321,14 @@ namespace Quiz.Infrastructure.Services
         public async Task<QuestionViewModel> AddQuestion(QuestionViewModel questionVM)
         {
             if (questionVM.QuestionsSetId == default(int))
-                throw new DataValidationException();
+                throw new DataValidationException("Pytanie musi być częścią" +
+                    "wybranego zestawu pytań");
 
             var question = new Pytanie
             {
                 Tresc = questionVM.Content,
                 Opis = questionVM.Description,
-                ZestawPytanId = questionVM.QuestionsSetId != default(int) ?
-                    questionVM.QuestionsSetId : throw new DataValidationException()
+                ZestawPytanId = questionVM.QuestionsSetId
             };
 
             await _dbContext.Pytania.AddAsync(question);
