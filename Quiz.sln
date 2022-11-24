@@ -3,21 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quiz.Infrastructure", "Quiz.Infrastructure\Quiz.Infrastructure.csproj", "{F2F5CA26-1DCA-4A9A-A69B-2451B50933D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quiz.Infrastructure", "Quiz.Infrastructure\Quiz.Infrastructure.csproj", "{F2F5CA26-1DCA-4A9A-A69B-2451B50933D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quiz.Api", "Quiz.Api\Quiz.Api.csproj", "{B79101A0-0937-45D4-BE5E-4E026C219B5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quiz.Api", "Quiz.Api\Quiz.Api.csproj", "{B79101A0-0937-45D4-BE5E-4E026C219B5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quiz.Shared", "Quiz.Shared\Quiz.Shared.csproj", "{D4AE6003-B811-470A-8A70-0565B805BFD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quiz.Shared", "Quiz.Shared\Quiz.Shared.csproj", "{D4AE6003-B811-470A-8A70-0565B805BFD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quiz.Data", "Quiz.Data\Quiz.Data.csproj", "{041D2DB7-1F2C-43D8-8522-20CC02F0C358}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quiz.Data", "Quiz.Data\Quiz.Data.csproj", "{041D2DB7-1F2C-43D8-8522-20CC02F0C358}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{FB9F06BD-24B1-4BF8-8DD1-2CAE0CDD5555}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F2F5CA26-1DCA-4A9A-A69B-2451B50933D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -36,5 +35,15 @@ Global
 		{041D2DB7-1F2C-43D8-8522-20CC02F0C358}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{041D2DB7-1F2C-43D8-8522-20CC02F0C358}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{041D2DB7-1F2C-43D8-8522-20CC02F0C358}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB9F06BD-24B1-4BF8-8DD1-2CAE0CDD5555}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB9F06BD-24B1-4BF8-8DD1-2CAE0CDD5555}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB9F06BD-24B1-4BF8-8DD1-2CAE0CDD5555}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB9F06BD-24B1-4BF8-8DD1-2CAE0CDD5555}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2D2CE1CA-4119-4A09-8EDA-5BBB0162CF42}
 	EndGlobalSection
 EndGlobal

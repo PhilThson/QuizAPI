@@ -28,7 +28,7 @@ internal class Program
             app.Seed();
         }
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
 
         app.UseAuthorization();
 
