@@ -38,9 +38,11 @@ namespace Quiz.Data.Data
                     throw new Exception("Nie udało się zainicjować DbContext'u");
                 }
                 //TODO tworzyć migrację a potem seed i zmienić sprawdzenia
-                dbContext.Database.EnsureCreated();
+                //dbContext.Database.EnsureCreated();
                 if (dbContext.Database.GetAppliedMigrations().Count() < 1)
                 {
+                    dbContext.Database.Migrate();
+
                     if (dbContext.Pracownicy.Any() && dbContext.Uczniowie.Any())
                         return;
 

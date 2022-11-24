@@ -13,9 +13,6 @@ services:
   quiz.api:
     depends_on:
       - sql_server
-    image: "container4phil/quizapi:first"
-    #build:
-    #  context: .
-    #  dockerfile: Quiz.Api/Dockerfile
+    image: "container4phil/quizapi:second"
     ports:
       - "5111:5111" 
