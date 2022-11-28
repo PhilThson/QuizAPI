@@ -285,10 +285,72 @@ namespace Quiz.Api.Controllers
                 var attachment = await _dataService.GetAttachmentById(id);
                 return Ok(attachment);
             }
-            catch (DataNotFoundException e)
+            catch (DataNotFoundException e){ return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+        #endregion
+
+        #region Diagnoza
+        [HttpGet("diagnozy")]
+        public async Task<IEnumerable<DiagnosisViewModel>> GetAllDiagnosis()
+        {
+            var diagnosis = await _dataService.GetAllDiagnosis();
+            return diagnosis;
+        }
+
+        [HttpGet("diagnozy/{id}")]
+        public async Task<IActionResult> GetDiagnosisById(int id)
+        {
+            try
             {
-                return NotFound();
+                var diagnosis = await _dataService.GetDiagnosisById(id);
+                return Ok(diagnosis);
             }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+
+        [HttpPost("diagnozy")]
+        public async Task<IActionResult> AddDiagnosis(CreateDiagnosisDto createDiagnosis)
+        {
+            try
+            {
+                var diagnosis = await _dataService.AddDiagnosis(createDiagnosis);
+                return CreatedAtAction(nameof(GetDiagnosisById),
+                    new { id = diagnosis.Id }, diagnosis);
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+        #endregion
+
+        #region Wyniki diagnozy
+        [HttpGet("wyniki/{id}")]
+        public async Task<IActionResult> GetResultById(long id)
+        {
+            try
+            {
+                var result = await _dataService.GetResultById(id);
+                return Ok(result);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpPost("wyniki")]
+        public async Task<IActionResult> AddDiagnosisResult(CreateResultDto createResult)
+        {
+            try
+            {
+                var result = await _dataService.AddDiagnosisResult(createResult);
+                return CreatedAtRoute(nameof(GetResultById),
+                    new { id = result.Id }, result);
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
     }

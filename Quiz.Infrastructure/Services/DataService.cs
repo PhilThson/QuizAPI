@@ -18,6 +18,7 @@ namespace Quiz.Infrastructure.Services
             _dbContext = dbContext;
         }
 
+        #region Employees
         public async Task<IEnumerable<EmployeeViewModel>> GetAllEmployees() =>
             await _dbContext.Pracownicy.Select(p => new EmployeeViewModel
             {
@@ -33,7 +34,9 @@ namespace Quiz.Infrastructure.Services
                 DateOfEmployment = p.DataZatrudnienia
             })
             .ToListAsync();
+        #endregion
 
+        #region Students
         public async Task<IEnumerable<StudentViewModel>> GetAllStudents() =>
             await _dbContext.Uczniowie.Select(u => new StudentViewModel
             {
@@ -45,6 +48,7 @@ namespace Quiz.Infrastructure.Services
                 Branch = u.Oddzial.Nazwa
             })
             .ToListAsync();
+        #endregion
 
         #region QuestionsSet
         public async Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets() =>
@@ -489,6 +493,185 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return await GetRatingById(ratingFromDb.Id);
+        }
+        #endregion
+
+        #region Diagnosis
+        public async Task<IEnumerable<DiagnosisViewModel>> GetAllDiagnosis() =>
+            await _dbContext.Diagnozy
+            .Select(d => new DiagnosisViewModel
+            {
+                Id = d.Id,
+                Employee = new EmployeeViewModel
+                {
+                    Id = d.Pracownik.Id,
+                    FirstName = d.Pracownik.Imie,
+                    LastName = d.Pracownik.Nazwisko,
+                    DateOfBirth = d.Pracownik.DataUrodzenia,
+                    PersonalNumber = d.Pracownik.Pesel,
+                    Salary = d.Pracownik.Pensja,
+                    Email = d.Pracownik.Email,
+                    Job = d.Pracownik.Etat.Nazwa,
+                    Position = d.Pracownik.Stanowisko.Nazwa,
+                    DateOfEmployment = d.Pracownik.DataZatrudnienia
+                },
+                Student = new StudentViewModel
+                {
+                    Id = d.Uczen.Id,
+                    FirstName = d.Uczen.Imie,
+                    LastName = d.Uczen.Nazwisko,
+                    DateOfBirth = d.Uczen.DataUrodzenia,
+                    PersonalNumber = d.Uczen.Pesel,
+                    Branch = d.Uczen.Oddzial.Nazwa
+                },
+                SchoolYear = d.RokSzkolny,
+                Results = new List<ResultViewModel>
+                    (
+                        d.DiagnozaWyniki
+                        .Select(w => new ResultViewModel
+                        {
+                            Id = w.Id,
+                            Notes = w.Notatki,
+                            RatingLevel = w.PoziomOceny,
+                            QuestionsSetRating = new RatingViewModel
+                            {
+                                Id = w.OcenaZestawuPytan.Id,
+                                RatingDescription = w.OcenaZestawuPytan.OpisOceny,
+                                QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId
+                            }
+                        })
+                    )
+            })
+            .ToListAsync();
+
+        public async Task<DiagnosisViewModel> GetDiagnosisById(int id) =>
+            await _dbContext.Diagnozy
+                .Where(d => d.Id == id)
+                .Select(d => new DiagnosisViewModel
+                {
+                    Id = d.Id,
+                    Employee = new EmployeeViewModel
+                    {
+                        Id = d.Pracownik.Id,
+                        FirstName = d.Pracownik.Imie,
+                        LastName = d.Pracownik.Nazwisko,
+                        DateOfBirth = d.Pracownik.DataUrodzenia,
+                        PersonalNumber = d.Pracownik.Pesel,
+                        Salary = d.Pracownik.Pensja,
+                        Email = d.Pracownik.Email,
+                        Job = d.Pracownik.Etat.Nazwa,
+                        Position = d.Pracownik.Stanowisko.Nazwa,
+                        DateOfEmployment = d.Pracownik.DataZatrudnienia
+                    },
+                    Student = new StudentViewModel
+                    {
+                        Id = d.Uczen.Id,
+                        FirstName = d.Uczen.Imie,
+                        LastName = d.Uczen.Nazwisko,
+                        DateOfBirth = d.Uczen.DataUrodzenia,
+                        PersonalNumber = d.Uczen.Pesel,
+                        Branch = d.Uczen.Oddzial.Nazwa
+                    },
+                    SchoolYear = d.RokSzkolny,
+                    Results = new List<ResultViewModel>
+                    (
+                        d.DiagnozaWyniki
+                        .Select(w => new ResultViewModel
+                        {
+                            Id = w.Id,
+                            Notes = w.Notatki,
+                            RatingLevel = w.PoziomOceny,
+                            QuestionsSetRating = new RatingViewModel
+                            {
+                                Id = w.OcenaZestawuPytan.Id,
+                                RatingDescription = w.OcenaZestawuPytan.OpisOceny,
+                                QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId
+                            }
+                        })
+                    )
+                })
+                .FirstOrDefaultAsync() ??
+                throw new DataNotFoundException();
+
+        public async Task<DiagnosisViewModel> AddDiagnosis(
+            CreateDiagnosisDto createDiagnosis)
+        {
+            if (!_dbContext.Pracownicy
+                .Any(p => p.Id == createDiagnosis.EmployeeId))
+                throw new DataValidationException(
+                    $"Nie znaleziono pracownika o podanym identyfikatorze " +
+                    $"({createDiagnosis.EmployeeId})");
+
+            if (!_dbContext.Uczniowie
+                .Any(u => u.Id == createDiagnosis.StudentId))
+                throw new DataValidationException(
+                    $"Nie znaleziono ucznia o podanym identyfikatorze " +
+                    $"({createDiagnosis.StudentId})");
+
+            if (_dbContext.Diagnozy
+                .Any(d => d.PracownikId == createDiagnosis.EmployeeId &&
+                    d.UczenId == createDiagnosis.StudentId &&
+                    d.RokSzkolny == createDiagnosis.SchoolYear))
+                throw new DataValidationException($"Diagnoza dla podanych" +
+                    $"paramterów już istnieje");
+
+            var diagnosis = new Diagnoza
+            {
+                PracownikId = createDiagnosis.EmployeeId,
+                UczenId = createDiagnosis.StudentId,
+                RokSzkolny = createDiagnosis.SchoolYear,
+                CzyAktywny = true
+            };
+
+            await _dbContext.Diagnozy.AddAsync(diagnosis);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetDiagnosisById(diagnosis.Id);
+        }
+        #endregion
+
+        #region Diagnosis Results
+        public async Task<ResultViewModel> GetResultById(long id) =>
+            await _dbContext.Wyniki
+            .Where(w => w.Id == id)
+            .Select(w => new ResultViewModel
+            {
+                Id = w.Id,
+                QuestionsSetRating = new RatingViewModel
+                {
+                    Id = w.OcenaZestawuPytan.Id,
+                    QuestionsSetId = w.OcenaZestawuPytanId,
+                    RatingDescription = w.OcenaZestawuPytan.OpisOceny
+                },
+                Notes = w.Notatki,
+                RatingLevel = w.PoziomOceny,
+                DiagnosisId = w.DiagnozaId
+            })
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException();
+
+        public async Task<ResultViewModel> AddDiagnosisResult(
+            CreateResultDto createResult)
+        {
+            if (_dbContext.Wyniki
+                .Any(w => w.DiagnozaId == createResult.DiagnosisId &&
+                    w.OcenaZestawuPytanId == createResult.RatingId))
+                throw new DataValidationException("Istnieje już" +
+                    "wynik dla podanego zastawu pytań");
+
+            var result = new Wynik
+            {
+                DiagnozaId = createResult.DiagnosisId,
+                OcenaZestawuPytanId = createResult.RatingId,
+                PoziomOceny = createResult.RatingLevel,
+                Notatki = createResult.Notes,
+                CzyAktywny = true
+            };
+
+            await _dbContext.Wyniki.AddAsync(result);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetResultById(result.Id);
         }
         #endregion
 

@@ -27,7 +27,7 @@ namespace Quiz.Data.Models
         public virtual Diagnoza Diagnoza { get; set; }
 
         [MaxLength(2048)]
-        public string Notatki { get; set; }
+        public string? Notatki { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime DataCzasWpisu { get; set; }
