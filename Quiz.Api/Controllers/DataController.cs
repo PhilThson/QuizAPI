@@ -335,7 +335,7 @@ namespace Quiz.Api.Controllers
                     new { id = diagnosis.Id }, diagnosis);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
@@ -359,11 +359,11 @@ namespace Quiz.Api.Controllers
             try
             {
                 var result = await _dataService.AddDiagnosisResult(createResult);
-                return CreatedAtRoute(nameof(GetResultById),
+                return CreatedAtAction(nameof(GetResultById),
                     new { id = result.Id }, result);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
 
@@ -377,7 +377,7 @@ namespace Quiz.Api.Controllers
                     diagnosisId, questionsSetId);
                 return Ok(result);
             }
-            catch (DataNotFoundException e) { return NotFound(); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
