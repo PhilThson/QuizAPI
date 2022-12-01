@@ -494,6 +494,24 @@ namespace Quiz.Infrastructure.Services
 
             return await GetRatingById(ratingFromDb.Id);
         }
+
+        public async Task<List<RatingViewModel>> GetRatingsByQuestionsSetId(
+            int questionsSetId)
+        {
+            if (!_dbContext.ZestawyPytan.Any(z => z.Id == questionsSetId))
+                throw new DataNotFoundException("Nie znaleziono zestawu " +
+                    $"pytań o podanym identyfikatorze ({questionsSetId})");
+
+            return await _dbContext.OcenyZestawowPytan
+            .Where(o => o.ZestawPytanId == questionsSetId)
+            .Select(o => new RatingViewModel
+            {
+                Id = o.Id,
+                RatingDescription = o.OpisOceny,
+                QuestionsSetId = o.ZestawPytanId
+            })
+            .ToListAsync();
+        }
         #endregion
 
         #region Diagnosis
@@ -639,8 +657,8 @@ namespace Quiz.Infrastructure.Services
                 Id = w.Id,
                 QuestionsSetRating = new RatingViewModel
                 {
-                    Id = w.OcenaZestawuPytan.Id,
-                    QuestionsSetId = w.OcenaZestawuPytanId,
+                    Id = w.OcenaZestawuPytanId,
+                    QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId,
                     RatingDescription = w.OcenaZestawuPytan.OpisOceny
                 },
                 Notes = w.Notatki,
@@ -673,6 +691,28 @@ namespace Quiz.Infrastructure.Services
 
             return await GetResultById(result.Id);
         }
+
+
+        public async Task<ResultViewModel> GetResultByDiagnosisQuestionsSetIds(
+            int diagnosisId, int questionsSetId) =>
+            await _dbContext.Wyniki
+            .Where(w => w.DiagnozaId == diagnosisId &&
+                w.OcenaZestawuPytan.ZestawPytanId == questionsSetId)
+            .Select(w => new ResultViewModel
+            {
+                Id = w.Id,
+                QuestionsSetRating = new RatingViewModel
+                {
+                    Id = w.OcenaZestawuPytan.Id,
+                    QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId,
+                    RatingDescription = w.OcenaZestawuPytan.OpisOceny
+                },
+                Notes = w.Notatki,
+                RatingLevel = w.PoziomOceny,
+                DiagnosisId = w.DiagnozaId
+            })
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException();
         #endregion
 
         #region Private Methods

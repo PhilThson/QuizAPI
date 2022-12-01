@@ -217,7 +217,7 @@ namespace Quiz.Data.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DataZmiany = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DataZmiany = table.Column<DateTime>(type: "datetime", nullable: false, computedColumnSql: "getdate()"),
                     Szczegoly = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UzytkownikId = table.Column<int>(type: "int", nullable: false),
                     CzyAktywny = table.Column<bool>(type: "bit", nullable: false),
@@ -480,7 +480,7 @@ namespace Quiz.Data.Migrations
                     PoziomOceny = table.Column<byte>(type: "tinyint", nullable: false),
                     DiagnozaId = table.Column<int>(type: "int", nullable: false),
                     Notatki = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: false),
-                    DataCzasWpisu = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DataCzasWpisu = table.Column<DateTime>(type: "datetime", nullable: false, computedColumnSql: "getdate()"),
                     CzyAktywny = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>

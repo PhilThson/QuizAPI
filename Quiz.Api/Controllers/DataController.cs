@@ -274,6 +274,20 @@ namespace Quiz.Api.Controllers
             catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(); }
         }
+
+        [HttpGet("ocenyZestawuPytan")]
+        public async Task<IActionResult> GetRatingsByQuestionsSetId(
+            [FromQuery] int questionsSetId)
+        {
+            try
+            {
+                var ratings =
+                    await _dataService.GetRatingsByQuestionsSetId(questionsSetId);
+                return Ok(ratings);
+            }
+            catch(DataNotFoundException e) { return NotFound(e.Message); }
+            catch(Exception e) { return BadRequest(e.Message); }
+        }
         #endregion
 
         #region Karty pracy
@@ -349,6 +363,20 @@ namespace Quiz.Api.Controllers
                     new { id = result.Id }, result);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpGet("wyniki")]
+        public async Task<IActionResult> GetResultByDiagnosisQuestionsSetIds(
+            [FromQuery] int diagnosisId, [FromQuery] int questionsSetId)
+        {
+            try
+            {
+                var result = await _dataService.GetResultByDiagnosisQuestionsSetIds(
+                    diagnosisId, questionsSetId);
+                return Ok(result);
+            }
             catch (DataNotFoundException e) { return NotFound(); }
             catch (Exception e) { return BadRequest(e.Message); }
         }

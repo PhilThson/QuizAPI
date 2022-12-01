@@ -34,6 +34,8 @@ namespace Quiz.Infrastructure.Interfaces
 
         Task<RatingViewModel> GetRatingById(int id);
         Task<RatingViewModel> UpdateRating(RatingViewModel ratingVM);
+        Task<List<RatingViewModel>> GetRatingsByQuestionsSetId(
+            int questionsSetId);
 
         Task<AttachmentFileViewModel> GetAttachmentById(int id);
 
@@ -44,5 +46,7 @@ namespace Quiz.Infrastructure.Interfaces
 
         Task<ResultViewModel> GetResultById(long id);
         Task<ResultViewModel> AddDiagnosisResult(CreateResultDto createResult);
+        Task<ResultViewModel> GetResultByDiagnosisQuestionsSetIds(
+            int diagnosisId, int questionsSetId);
     }
 }

@@ -12,6 +12,6 @@ namespace Quiz.Shared.ViewModels
         public string SchoolYear { get; set; }
         public StudentViewModel Student { get; set; }
         public EmployeeViewModel Employee { get; set; }
-        public virtual IList<ResultViewModel>? Results { get; set; }
+        public IList<ResultViewModel>? Results { get; set; }
     }
 }

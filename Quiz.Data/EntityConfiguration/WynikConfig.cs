@@ -9,6 +9,11 @@ namespace Quiz.Data.EntityConfiguration
         public void Configure(EntityTypeBuilder<Wynik> builder)
         {
             builder
+                .Property(w => w.DataCzasWpisu)
+                .HasColumnType("datetime")
+                .HasComputedColumnSql("getdate()");
+
+            builder
                 .HasOne(w => w.OcenaZestawuPytan)
                 .WithMany(o => o.OcenaZestawuPytanWyniki)
                 .OnDelete(DeleteBehavior.NoAction);

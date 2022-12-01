@@ -176,7 +176,8 @@ namespace Quiz.Data.Migrations
 
                     b.Property<DateTime>("DataZmiany")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime")
+                        .HasComputedColumnSql("getdate()");
 
                     b.Property<string>("Nazwa")
                         .IsRequired()
@@ -690,7 +691,8 @@ namespace Quiz.Data.Migrations
 
                     b.Property<DateTime>("DataCzasWpisu")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime")
+                        .HasComputedColumnSql("getdate()");
 
                     b.Property<int>("DiagnozaId")
                         .HasColumnType("int");
