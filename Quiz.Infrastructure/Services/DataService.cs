@@ -627,11 +627,10 @@ namespace Quiz.Infrastructure.Services
                     $"({createDiagnosis.StudentId})");
 
             if (_dbContext.Diagnozy
-                .Any(d => d.PracownikId == createDiagnosis.EmployeeId &&
-                    d.UczenId == createDiagnosis.StudentId &&
+                .Any(d => d.UczenId == createDiagnosis.StudentId &&
                     d.RokSzkolny == createDiagnosis.SchoolYear))
-                throw new DataValidationException($"Diagnoza dla podanych" +
-                    $"paramterów już istnieje");
+                throw new DataValidationException("Uczeń już posiada diagnozę" +
+                    "za dany rok");
 
             var diagnosis = new Diagnoza
             {

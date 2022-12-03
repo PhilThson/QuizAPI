@@ -156,7 +156,7 @@ namespace Quiz.Api.Controllers
                 return Ok(updated);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpPatch("zestawyPytan/{id}/difficulty")]
@@ -173,7 +173,7 @@ namespace Quiz.Api.Controllers
                 return Ok(updated);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
 
