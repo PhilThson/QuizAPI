@@ -670,11 +670,25 @@ namespace Quiz.Infrastructure.Services
         public async Task<ResultViewModel> AddDiagnosisResult(
             CreateResultDto createResult)
         {
-            if (_dbContext.Wyniki
-                .Any(w => w.DiagnozaId == createResult.DiagnosisId &&
-                    w.OcenaZestawuPytanId == createResult.RatingId))
-                throw new DataValidationException("Istnieje już" +
-                    "wynik dla podanego zastawu pytań");
+            if (!_dbContext.Diagnozy.Any(d => d.Id == createResult.DiagnosisId))
+                throw new DataValidationException("Nie znaleziono formularza " +
+                    "diagnozy o podanym identyfikatorze " +
+                    $"({createResult.DiagnosisId})");
+
+            if (!_dbContext.OcenyZestawowPytan.Any(o => o.Id == createResult.RatingId))
+                throw new DataValidationException("Nie znaleziono oceny zestawu " +
+                    "pytań o podanym identyfikatorze " +
+                    $"({createResult.RatingId})");
+
+            if (createResult.RatingLevel < 1 || createResult.RatingLevel > 6)
+                throw new DataValidationException("Przekroczono zakres poziomu oceny " +
+                    "zestawu pytań");
+
+            //if (_dbContext.Wyniki
+            //    .Any(w => w.DiagnozaId == createResult.DiagnosisId &&
+            //        w.OcenaZestawuPytanId == createResult.RatingId))
+            //    throw new DataValidationException("Istnieje już " +
+            //        "wynik dla podanego zastawu pytań");
 
             var result = new Wynik
             {
