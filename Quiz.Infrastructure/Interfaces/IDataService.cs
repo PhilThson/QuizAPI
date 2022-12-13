@@ -7,6 +7,8 @@ namespace Quiz.Infrastructure.Interfaces
     public interface IDataService
     {
         Task<IEnumerable<EmployeeViewModel>> GetAllEmployees();
+        Task<EmployeeViewModel> GetEmployeeById(int id);
+
         Task<IEnumerable<StudentViewModel>> GetAllStudents();
 
         Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets();

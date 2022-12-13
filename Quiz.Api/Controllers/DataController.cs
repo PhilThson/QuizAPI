@@ -26,6 +26,18 @@ namespace Quiz.Api.Controllers
 
             return employees;
         }
+
+        [HttpGet("pracownicy/{id}")]
+        public async Task<IActionResult> GetEmployeeById(int id)
+        {
+            try
+            {
+                var result = await _dataService.GetEmployeeById(id);
+                return Ok(result);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
         #endregion
 
         #region Uczniowie

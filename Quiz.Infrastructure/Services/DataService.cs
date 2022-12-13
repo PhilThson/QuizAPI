@@ -34,6 +34,25 @@ namespace Quiz.Infrastructure.Services
                 DateOfEmployment = p.DataZatrudnienia
             })
             .ToListAsync();
+
+        public async Task<EmployeeViewModel> GetEmployeeById(int id) =>
+            await _dbContext.Pracownicy
+            .Where(p => p.Id == id)
+            .Select(p => new EmployeeViewModel
+            {
+                Id = p.Id,
+                FirstName = p.Imie,
+                LastName = p.Nazwisko,
+                DateOfBirth = p.DataUrodzenia,
+                PersonalNumber = p.Pesel,
+                Salary = p.Pensja,
+                Email = p.Email,
+                Job = p.Etat.Nazwa,
+                Position = p.Stanowisko.Nazwa,
+                DateOfEmployment = p.DataZatrudnienia
+            })
+            .FirstOrDefaultAsync()
+            ?? throw new DataNotFoundException();
         #endregion
 
         #region Students
