@@ -1,5 +1,6 @@
 ﻿using Quiz.Data.Models;
 using Quiz.Shared.DTOs;
+using Quiz.Shared.DTOs.Read;
 using Quiz.Shared.ViewModels;
 
 namespace Quiz.Infrastructure.Interfaces
@@ -50,5 +51,8 @@ namespace Quiz.Infrastructure.Interfaces
         Task<ResultViewModel> AddDiagnosisResult(CreateResultDto createResult);
         Task<ResultViewModel> GetResultByDiagnosisQuestionsSetIds(
             int diagnosisId, int questionsSetId);
+
+        Task<IEnumerable<JobDto>> GetAllJobs();
+        Task<IEnumerable<PositionDto>> GetAllPositions();
     }
 }

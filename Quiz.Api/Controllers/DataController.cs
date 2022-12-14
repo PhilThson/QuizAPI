@@ -393,5 +393,23 @@ namespace Quiz.Api.Controllers
             catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
+
+        #region Etaty
+        [HttpGet("etaty")]
+        public async Task<IActionResult> GetAllJobs()
+        {
+            var jobs = await _dataService.GetAllJobs();
+            return Ok(jobs);
+        }
+        #endregion
+
+        #region Stanowiska
+        [HttpGet("stanowiska")]
+        public async Task<IActionResult> GetAllPositions()
+        {
+            var positions = await _dataService.GetAllPositions();
+            return Ok(positions);
+        }
+        #endregion
     }
 }

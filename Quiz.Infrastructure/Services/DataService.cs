@@ -5,6 +5,7 @@ using Quiz.Data.Models;
 using Quiz.Data.Models.Base;
 using Quiz.Infrastructure.Interfaces;
 using Quiz.Shared.DTOs;
+using Quiz.Shared.DTOs.Read;
 using Quiz.Shared.ViewModels;
 
 namespace Quiz.Infrastructure.Services
@@ -26,12 +27,13 @@ namespace Quiz.Infrastructure.Services
                 FirstName = p.Imie,
                 LastName = p.Nazwisko,
                 DateOfBirth = p.DataUrodzenia,
-                PersonalNumber = p.Pesel,
-                Salary = p.Pensja,
-                Email = p.Email,
-                Job = p.Etat.Nazwa,
-                Position = p.Stanowisko.Nazwa,
-                DateOfEmployment = p.DataZatrudnienia
+                PersonalNumber = p.Pesel
+                //Salary = p.Pensja,
+                //Email = p.Email,
+                //PhoneNumber = p.NrTelefonu,
+                //Job = p.Etat.Nazwa,
+                //Position = p.Stanowisko.Nazwa,
+                //DateOfEmployment = p.DataZatrudnienia
             })
             .ToListAsync();
 
@@ -47,8 +49,17 @@ namespace Quiz.Infrastructure.Services
                 PersonalNumber = p.Pesel,
                 Salary = p.Pensja,
                 Email = p.Email,
-                Job = p.Etat.Nazwa,
-                Position = p.Stanowisko.Nazwa,
+                PhoneNumber = p.NrTelefonu,
+                Job = new JobDto()
+                {
+                    Id = p.Etat.Id,
+                    Name = p.Etat.Nazwa
+                },
+                Position = new PositionDto()
+                {
+                    Id = p.Stanowisko.Id,
+                    Name = p.Stanowisko.Nazwa
+                },
                 DateOfEmployment = p.DataZatrudnienia
             })
             .FirstOrDefaultAsync()
@@ -548,8 +559,16 @@ namespace Quiz.Infrastructure.Services
                     PersonalNumber = d.Pracownik.Pesel,
                     Salary = d.Pracownik.Pensja,
                     Email = d.Pracownik.Email,
-                    Job = d.Pracownik.Etat.Nazwa,
-                    Position = d.Pracownik.Stanowisko.Nazwa,
+                    Job = new JobDto
+                    {
+                        Id = d.Pracownik.Etat.Id,
+                        Name = d.Pracownik.Etat.Nazwa
+                    },
+                    Position = new PositionDto
+                    {
+                        Id = d.Pracownik.Stanowisko.Id,
+                        Name = d.Pracownik.Stanowisko.Nazwa
+                    },
                     DateOfEmployment = d.Pracownik.DataZatrudnienia
                 },
                 Student = new StudentViewModel
@@ -596,8 +615,16 @@ namespace Quiz.Infrastructure.Services
                         PersonalNumber = d.Pracownik.Pesel,
                         Salary = d.Pracownik.Pensja,
                         Email = d.Pracownik.Email,
-                        Job = d.Pracownik.Etat.Nazwa,
-                        Position = d.Pracownik.Stanowisko.Nazwa,
+                        Job = new JobDto()
+                        {
+                            Id = d.Pracownik.Etat.Id,
+                            Name = d.Pracownik.Etat.Nazwa,
+                        },
+                        Position = new PositionDto()
+                        {
+                            Id = d.Pracownik.Stanowisko.Id,
+                            Name = d.Pracownik.Stanowisko.Nazwa,
+                        },
                         DateOfEmployment = d.Pracownik.DataZatrudnienia
                     },
                     Student = new StudentViewModel
@@ -745,6 +772,28 @@ namespace Quiz.Infrastructure.Services
             })
             .FirstOrDefaultAsync() ??
             throw new DataNotFoundException();
+        #endregion
+
+        #region Job
+        public async Task<IEnumerable<JobDto>> GetAllJobs() =>
+            await _dbContext.Etaty
+            .Select(e => new JobDto
+            {
+                Id = e.Id,
+                Name = e.Nazwa
+            })
+            .ToListAsync();
+        #endregion
+
+        #region Position
+        public async Task<IEnumerable<PositionDto>> GetAllPositions() =>
+            await _dbContext.Stanowiska
+            .Select(s => new PositionDto
+            {
+                Id = s.Id,
+                Name = s.Nazwa
+            })
+            .ToListAsync();
         #endregion
 
         #region Private Methods
