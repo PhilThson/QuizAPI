@@ -10,7 +10,9 @@ namespace Quiz.Data.Models
             UczenOceny = new HashSet<Ocena>();
             UczenDiagnozy = new HashSet<Diagnoza>();
         }
-
+        //TODO:
+        //Tutaj NIE powinno być wychowawcy,
+        //powinien on być dociągany z powiązanego oddziału
         public int WychowawcaId { get; set; }
 
         [Required]

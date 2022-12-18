@@ -13,6 +13,8 @@ namespace Quiz.Data.EntityConfiguration
                 .HasColumnType("money")
                 .HasPrecision(7, 2)
                 .IsRequired(true);
+
+            builder.HasQueryFilter(p => p.CzyAktywny);
         }
     }
 }

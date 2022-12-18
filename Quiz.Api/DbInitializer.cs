@@ -89,6 +89,7 @@ namespace Quiz.Data.Data
                 .UseSeed(1122)
                 //.RuleFor(e => e.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(e => e.Nazwa, f => ((EtatEnum)f.IndexFaker).ToString())
+                .RuleFor(e => e.Opis, f => ((EtatEnum)f.IndexFaker).GetDescription())
                 .RuleFor(e => e.CzyAktywny, f => true);
 
             Etaty = etatFaker.Generate(Enum.GetNames<EtatEnum>().Length);
@@ -152,6 +153,7 @@ namespace Quiz.Data.Data
                 .UseSeed(7788)
                 //.RuleFor(e => e.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(e => e.Nazwa, f => ((StanowiskoEnum)f.IndexFaker).ToString())
+                .RuleFor(e => e.Opis, f => ((StanowiskoEnum)f.IndexFaker).ToString())
                 .RuleFor(e => e.CzyAktywny, f => true);
 
             Stanowiska = stanowiskoFaker.Generate(Enum.GetNames<StanowiskoEnum>().Length);

@@ -23,7 +23,6 @@ namespace Quiz.Api.Controllers
         public async Task<IEnumerable<EmployeeViewModel>> GetAllEmployees()
         {
             var employees = await _dataService.GetAllEmployees();
-
             return employees;
         }
 
@@ -38,6 +37,20 @@ namespace Quiz.Api.Controllers
             catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
+
+        [HttpPost("pracownicy")]
+        public async Task<IActionResult> AddEmployee(CreateEmployeeDto employeeDto)
+        {
+            try
+            {
+                var createdEmployee = await _dataService.AddEmployee(employeeDto);
+                return CreatedAtAction(nameof(GetEmployeeById), createdEmployee,
+                    new { id = createdEmployee.Id });
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
         #endregion
 
         #region Uczniowie
@@ -45,8 +58,33 @@ namespace Quiz.Api.Controllers
         public async Task<IEnumerable<StudentViewModel>> GetAllStudents()
         {
             var students = await _dataService.GetAllStudents();
-
             return students;
+        }
+
+        [HttpGet("uczniowie/{id}")]
+        public async Task<IActionResult> GetStudentById(int id)
+        {
+            try
+            {
+                var result = await _dataService.GetStudentById(id);
+                return Ok(result);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpPost("uczniowie")]
+        public async Task<IActionResult> AddStudent(CreateStudentDto studentDto)
+        {
+            try
+            {
+                var createdStudent = await _dataService.AddStudent(studentDto);
+                return CreatedAtAction(nameof(GetStudentById), createdStudent,
+                    new { id = createdStudent.Id });
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
 
@@ -55,7 +93,6 @@ namespace Quiz.Api.Controllers
         public async Task<IEnumerable<QuestionViewModel>> GetAllQuestions()
         {
             var questions = await _dataService.GetAllQuestions();
-
             return questions;
         }
 
@@ -67,10 +104,7 @@ namespace Quiz.Api.Controllers
                 var question = await _dataService.GetQuestionById(id);
                 return Ok(question);
             }
-            catch(DataNotFoundException e)
-            {
-                return NotFound();
-            }
+            catch(DataNotFoundException e) { return NotFound(); }
         }
 
         [HttpPost("pytania")]
@@ -409,6 +443,15 @@ namespace Quiz.Api.Controllers
         {
             var positions = await _dataService.GetAllPositions();
             return Ok(positions);
+        }
+        #endregion
+
+        #region Oddzialy
+        [HttpGet("oddzialy")]
+        public async Task<IActionResult> GetAllBranches()
+        {
+            var branches = await _dataService.GetAllBranches();
+            return Ok(branches);
         }
         #endregion
     }

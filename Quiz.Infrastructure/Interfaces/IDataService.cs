@@ -9,8 +9,11 @@ namespace Quiz.Infrastructure.Interfaces
     {
         Task<IEnumerable<EmployeeViewModel>> GetAllEmployees();
         Task<EmployeeViewModel> GetEmployeeById(int id);
+        Task<EmployeeViewModel> AddEmployee(CreateEmployeeDto employeeDto);
 
         Task<IEnumerable<StudentViewModel>> GetAllStudents();
+        Task<StudentViewModel> GetStudentById(int id);
+        Task<StudentViewModel> AddStudent(CreateStudentDto studentDto);
 
         Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets();
         Task<QuestionsSetViewModel> GetQuestionsSetById(int id);
@@ -54,5 +57,6 @@ namespace Quiz.Infrastructure.Interfaces
 
         Task<IEnumerable<JobDto>> GetAllJobs();
         Task<IEnumerable<PositionDto>> GetAllPositions();
+        Task<IEnumerable<BranchDto>> GetAllBranches();
     }
 }

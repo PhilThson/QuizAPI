@@ -20,20 +20,16 @@ namespace Quiz.Infrastructure.Services
         }
 
         #region Employees
+        //lista wszystkich elementów zwraca tylko podstawowe dane
         public async Task<IEnumerable<EmployeeViewModel>> GetAllEmployees() =>
-            await _dbContext.Pracownicy.Select(p => new EmployeeViewModel
+            await _dbContext.Pracownicy
+            .Select(p => new EmployeeViewModel
             {
                 Id = p.Id,
                 FirstName = p.Imie,
                 LastName = p.Nazwisko,
                 DateOfBirth = p.DataUrodzenia,
                 PersonalNumber = p.Pesel
-                //Salary = p.Pensja,
-                //Email = p.Email,
-                //PhoneNumber = p.NrTelefonu,
-                //Job = p.Etat.Nazwa,
-                //Position = p.Stanowisko.Nazwa,
-                //DateOfEmployment = p.DataZatrudnienia
             })
             .ToListAsync();
 
@@ -64,25 +60,80 @@ namespace Quiz.Infrastructure.Services
             })
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
+
+        public async Task<EmployeeViewModel> AddEmployee(CreateEmployeeDto employeeDto)
+        {
+            if (!_dbContext.Etaty
+                .Any(e => e.Id == employeeDto.JobId))
+                throw new DataNotFoundException("Nie znaleziono etatu o podanym" +
+                    $"identyfikatorze ({employeeDto.JobId})");
+
+            if (!_dbContext.Stanowiska
+                .Any(s => s.Id == employeeDto.PositionId))
+                throw new DataNotFoundException("Nie znaleziono stanowiska " +
+                    $"o podanym identyfikatorze ({employeeDto.PositionId})");
+
+            var employeeToCreate = (Pracownik)employeeDto;
+            await _dbContext.Pracownicy.AddAsync(employeeToCreate);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetEmployeeById(employeeToCreate.Id);
+        }
         #endregion
 
         #region Students
         public async Task<IEnumerable<StudentViewModel>> GetAllStudents() =>
-            await _dbContext.Uczniowie.Select(u => new StudentViewModel
+            await _dbContext.Uczniowie
+            .Select(u => new StudentViewModel
+            {
+                Id = u.Id,
+                FirstName = u.Imie,
+                LastName = u.Nazwisko,
+                DateOfBirth = u.DataUrodzenia,
+                PersonalNumber = u.Pesel
+            })
+            .ToListAsync();
+
+        public async Task<StudentViewModel> GetStudentById(int id) =>
+            await _dbContext.Uczniowie
+            .Select(u => new StudentViewModel
             {
                 Id = u.Id,
                 FirstName = u.Imie,
                 LastName = u.Nazwisko,
                 DateOfBirth = u.DataUrodzenia,
                 PersonalNumber = u.Pesel,
-                Branch = u.Oddzial.Nazwa
+                Branch = new BranchDto
+                {
+                    Id = u.Oddzial.Id,
+                    Name = u.Oddzial.Nazwa,
+                    Description = u.Oddzial.Opis,
+                    Teacher = u.Oddzial.Pracownik.Imie + " " +
+                        u.Oddzial.Pracownik.Nazwisko
+                }
             })
-            .ToListAsync();
+            .FirstOrDefaultAsync()
+            ?? throw new DataNotFoundException();
+
+        public async Task<StudentViewModel> AddStudent(CreateStudentDto studentDto)
+        {
+            if (!_dbContext.Oddzialy.Any(o => o.Id == studentDto.BranchId))
+                throw new DataNotFoundException("Nie znaleziono oddziału " +
+                    $"o podanym identyfikatorze: {studentDto.BranchId}");
+
+            var student = (Uczen)studentDto;
+            await _dbContext.Uczniowie.AddAsync(student);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetStudentById(student.Id);
+        }
+
         #endregion
 
         #region QuestionsSet
         public async Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets() =>
-            await _dbContext.ZestawyPytan.Select(z => new QuestionsSetViewModel
+            await _dbContext.ZestawyPytan
+            .Select(z => new QuestionsSetViewModel
             {
                 Id = z.Id,
                 SkillDescription = z.OpisUmiejetnosci,
@@ -577,8 +628,7 @@ namespace Quiz.Infrastructure.Services
                     FirstName = d.Uczen.Imie,
                     LastName = d.Uczen.Nazwisko,
                     DateOfBirth = d.Uczen.DataUrodzenia,
-                    PersonalNumber = d.Uczen.Pesel,
-                    Branch = d.Uczen.Oddzial.Nazwa
+                    PersonalNumber = d.Uczen.Pesel
                 },
                 SchoolYear = d.RokSzkolny,
                 Results = new List<ResultViewModel>
@@ -633,8 +683,7 @@ namespace Quiz.Infrastructure.Services
                         FirstName = d.Uczen.Imie,
                         LastName = d.Uczen.Nazwisko,
                         DateOfBirth = d.Uczen.DataUrodzenia,
-                        PersonalNumber = d.Uczen.Pesel,
-                        Branch = d.Uczen.Oddzial.Nazwa
+                        PersonalNumber = d.Uczen.Pesel
                     },
                     SchoolYear = d.RokSzkolny,
                     Results = new List<ResultViewModel>
@@ -792,6 +841,18 @@ namespace Quiz.Infrastructure.Services
             {
                 Id = s.Id,
                 Name = s.Nazwa
+            })
+            .ToListAsync();
+        #endregion
+
+        #region Branch
+        public async Task<IEnumerable<BranchDto>> GetAllBranches() =>
+            await _dbContext.Oddzialy
+            .Select(o => new BranchDto
+            {
+                Id = o.Id,
+                Name = o.Nazwa,
+                Description = o.Opis
             })
             .ToListAsync();
         #endregion

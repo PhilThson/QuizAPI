@@ -22,6 +22,8 @@ namespace Quiz.Data.EntityConfiguration
                 .HasMany(u => u.UczenOceny)
                 .WithOne(o => o.Uczen)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasQueryFilter(u => u.CzyAktywny);
         }
     }
 }
