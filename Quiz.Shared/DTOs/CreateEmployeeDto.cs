@@ -41,7 +41,8 @@ namespace Quiz.Shared.DTOs
 				EtatId = createEmployee.JobId,
 				StanowiskoId = createEmployee.PositionId,
 				DataZatrudnienia = createEmployee.DateOfEmployment.Value,
-				DataKoncaZatrudnienia = createEmployee.EmploymentEndDate
+				DataKoncaZatrudnienia = createEmployee.EmploymentEndDate,
+				CzyAktywny = true
 			};
 		}
 	}

@@ -10,6 +10,6 @@ namespace Quiz.Shared.ViewModels
         public string LastName { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string PersonalNumber { get; set; }
-        public BranchDto Branch { get; set; }
+        public BranchDto? Branch { get; set; }
     }
 }

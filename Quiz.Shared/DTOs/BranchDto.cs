@@ -11,4 +11,3 @@ namespace Quiz.Shared.DTOs
 		public string Teacher { get; set; }
 	}
 }
-

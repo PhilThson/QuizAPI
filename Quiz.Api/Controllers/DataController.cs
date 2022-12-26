@@ -44,8 +44,8 @@ namespace Quiz.Api.Controllers
             try
             {
                 var createdEmployee = await _dataService.AddEmployee(employeeDto);
-                return CreatedAtAction(nameof(GetEmployeeById), createdEmployee,
-                    new { id = createdEmployee.Id });
+                return CreatedAtAction(nameof(GetEmployeeById),
+                    new { id = createdEmployee.Id }, createdEmployee);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
@@ -79,8 +79,8 @@ namespace Quiz.Api.Controllers
             try
             {
                 var createdStudent = await _dataService.AddStudent(studentDto);
-                return CreatedAtAction(nameof(GetStudentById), createdStudent,
-                    new { id = createdStudent.Id });
+                return CreatedAtAction(nameof(GetStudentById),
+                    new { id = createdStudent.Id }, createdStudent);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
             catch (DataNotFoundException e) { return NotFound(e.Message); }

@@ -18,7 +18,8 @@ namespace Quiz.Shared.DTOs
 				Pesel = createStudent.PersonalNumber,
 				MiejsceUrodzenia = createStudent.BirthCity,
 				DataUrodzenia = createStudent.DateOfBirth,
-				OddzialId = createStudent.BranchId.Value
+				OddzialId = createStudent.BranchId.Value,
+				CzyAktywny = true
 			};
     }
 }
