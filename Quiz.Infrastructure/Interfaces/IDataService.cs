@@ -32,11 +32,15 @@ namespace Quiz.Infrastructure.Interfaces
         Task<IEnumerable<AreaViewModel>> GetAllAreas();
         Task<AreaViewModel> GetAreaById(byte id);
         Task<AreaViewModel> UpdateArea(AreaViewModel areaVM);
+        Task DeleteAreaById(byte id);
+        Task<AreaViewModel> AddArea(CreateDictionaryDto areaDto);
 
         Task<IEnumerable<DifficultyViewModel>> GetAllDifficulties();
         Task<DifficultyViewModel> GetDifficultyById(byte id);
         Task<DifficultyViewModel> UpdateDifficulty(
             DifficultyViewModel difficultyVM);
+        Task DeleteDifficultyById(byte id);
+        Task<DifficultyViewModel> AddDifficulty(CreateDictionaryDto difficultyDto);
 
         Task<RatingViewModel> GetRatingById(int id);
         Task<RatingViewModel> UpdateRating(RatingViewModel ratingVM);

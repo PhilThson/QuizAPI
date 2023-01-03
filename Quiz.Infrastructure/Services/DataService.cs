@@ -489,6 +489,34 @@ namespace Quiz.Infrastructure.Services
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
 
+        public async Task<AreaViewModel> AddArea(CreateDictionaryDto createDto)
+        {
+            var existingArea = await _dbContext.ObszaryZestawowPytan
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(a => a.Nazwa == createDto.Name
+                                && a.Opis == createDto.Description);
+
+            if (existingArea != null)
+            {
+                if (existingArea.CzyAktywny)
+                    throw new AlreadyExistsException();
+
+                existingArea.CzyAktywny = true;
+                return await GetAreaById(existingArea.Id);
+            }
+
+            var areaToCreate = new ObszarZestawuPytan
+            {
+                Nazwa = createDto.Name,
+                Opis = createDto.Description,
+                CzyAktywny = true
+            };
+            await _dbContext.ObszaryZestawowPytan.AddAsync(areaToCreate);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetAreaById(areaToCreate.Id);
+        }
+
         public async Task<AreaViewModel> UpdateArea(AreaViewModel areaVM)
         {
             var areaFromDb = await _dbContext.ObszaryZestawowPytan
@@ -503,6 +531,16 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return await GetAreaById(areaFromDb.Id);
+        }
+
+        public async Task DeleteAreaById(byte id)
+        {
+            var area = await _dbContext.ObszaryZestawowPytan
+                .FirstOrDefaultAsync(a => a.Id == id) ??
+                throw new DataNotFoundException();
+
+            area.CzyAktywny = false;
+            await _dbContext.SaveChangesAsync();
         }
         #endregion
 
@@ -529,6 +567,33 @@ namespace Quiz.Infrastructure.Services
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
 
+        public async Task<DifficultyViewModel> AddDifficulty(CreateDictionaryDto createDto)
+        {
+            var existingDifficulty = await _dbContext.SkaleTrudnosci
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(d => d.Nazwa == createDto.Name
+                                && d.Opis == createDto.Description);
+            if (existingDifficulty != null)
+            {
+                if (existingDifficulty.CzyAktywny)
+                    throw new AlreadyExistsException();
+
+                existingDifficulty.CzyAktywny = true;
+                return await GetDifficultyById(existingDifficulty.Id);
+            }
+
+            var difficultyToCreate = new SkalaTrudnosci
+            {
+                Nazwa = createDto.Name,
+                Opis = createDto.Description,
+                CzyAktywny = true,
+            };
+            await _dbContext.SkaleTrudnosci.AddAsync(difficultyToCreate);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetDifficultyById(difficultyToCreate.Id);
+        }
+
         public async Task<DifficultyViewModel> UpdateDifficulty(
             DifficultyViewModel difficultyVM)
         {
@@ -547,6 +612,16 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return await GetDifficultyById(difficultyFromDb.Id);
+        }
+
+        public async Task DeleteDifficultyById(byte id)
+        {
+            var difficulty = await _dbContext.SkaleTrudnosci
+                .FirstOrDefaultAsync(d => d.Id == id) ??
+                throw new DataNotFoundException();
+
+            difficulty.CzyAktywny = false;
+            await _dbContext.SaveChangesAsync();
         }
         #endregion
 

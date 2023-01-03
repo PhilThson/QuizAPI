@@ -21,4 +21,15 @@ namespace Quiz.Data.Helpers
 			: base(message)
 		{ }
 	}
+
+	public class AlreadyExistsException : Exception
+	{
+		public AlreadyExistsException()
+			: base("Istnieje już rekord o podanych parametrach")
+		{ }
+
+		public AlreadyExistsException(string message)
+			: base(message)
+		{ }
+    }
 }

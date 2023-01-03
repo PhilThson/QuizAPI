@@ -243,6 +243,19 @@ namespace Quiz.Api.Controllers
             catch (Exception e) { return BadRequest(); }
         }
 
+        [HttpPost("obszary")]
+        public async Task<IActionResult> AddArea(CreateDictionaryDto createDto)
+        {
+            try
+            {
+                var created = await _dataService.AddArea(createDto);
+                return CreatedAtAction(nameof(GetAreaById),
+                    new { id = created.Id }, created);
+            }
+            catch (AlreadyExistsException e) { return BadRequest(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
         [HttpPut("obszary")]
         public async Task<IActionResult> UpdateArea([FromBody] AreaViewModel areaVM)
         {
@@ -255,6 +268,18 @@ namespace Quiz.Api.Controllers
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(); }
+        }
+
+        [HttpDelete("obszary/{id}")]
+        public async Task<IActionResult> DeleteAreaById(byte id)
+        {
+            try
+            {
+                await _dataService.DeleteAreaById(id);
+                return NoContent();
+            }
+            catch (DataNotFoundException e) { return BadRequest(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
 
@@ -278,6 +303,19 @@ namespace Quiz.Api.Controllers
             catch (Exception e) { return BadRequest(); }
         }
 
+        [HttpPost("skaleTrudnosci")]
+        public async Task<IActionResult> AddDifficulty(CreateDictionaryDto createDto)
+        {
+            try
+            {
+                var created = await _dataService.AddDifficulty(createDto);
+                return CreatedAtAction(nameof(GetDifficultyById),
+                    new { id = created.Id }, created);
+            }
+            catch (AlreadyExistsException e) { return BadRequest(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
         [HttpPut("skaleTrudnosci")]
         public async Task<IActionResult> UpdateDifficulty([FromBody]
             DifficultyViewModel difficultyVM)
@@ -290,7 +328,19 @@ namespace Quiz.Api.Controllers
                 return Ok(updated);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpDelete("skaleTrudnosci/{id}")]
+        public async Task<IActionResult> DeleteDifficultyById([FromRoute] byte id)
+        {
+            try
+            {
+                await _dataService.DeleteDifficultyById(id);
+                return NoContent();
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
 
