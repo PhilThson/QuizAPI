@@ -1,12 +1,20 @@
-﻿namespace Quiz.Data.Enums
+﻿using System.ComponentModel;
+
+namespace Quiz.Data.Enums
 {
     public enum StanowiskoEnum
     {
-        Obsługa,
+        [Description("Obsługa")]
+        Obsluga,
+        [Description("Konserwator")]
         Konserwator,
+        [Description("Pomoc")]
         Pomoc,
+        [Description("Pedagog")]
         Pedagog,
+        [Description("Kierownik")]
         Kierownik,
+        [Description("Dyrektor")]
         Dyrektor
     }
 }

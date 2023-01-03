@@ -80,14 +80,12 @@ namespace Quiz.Data.Data
         }
         #endregion
 
-
         #region Zasilanie encji słownikowych
 
         public static List<Etat> EtatySeed()
         {
             var etatFaker = new Faker<Etat>()
                 .UseSeed(1122)
-                //.RuleFor(e => e.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(e => e.Nazwa, f => ((EtatEnum)f.IndexFaker).ToString())
                 .RuleFor(e => e.Opis, f => ((EtatEnum)f.IndexFaker).GetDescription())
                 .RuleFor(e => e.CzyAktywny, f => true);
@@ -100,7 +98,6 @@ namespace Quiz.Data.Data
         {
             var obszarZestawuPytanFaker = new Faker<ObszarZestawuPytan>()
                 .UseSeed(1212)
-                //.RuleFor(e => e.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(e => e.Nazwa, f => ((ObszarZestawuPytanEnum)f.IndexFaker).ToString())
                 .RuleFor(e => e.Opis, f => ((ObszarZestawuPytanEnum)f.IndexFaker).GetDescription())
                 .RuleFor(e => e.CzyAktywny, f => true);
@@ -114,7 +111,6 @@ namespace Quiz.Data.Data
         {
             var skalaTrudnosciFaker = new Faker<SkalaTrudnosci>()
                 .UseSeed(1221)
-                //.RuleFor(e => e.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(e => e.Nazwa, f => ((SkalaTrudnosciEnum)f.IndexFaker).ToString())
                 .RuleFor(e => e.Opis, f => ((SkalaTrudnosciEnum)f.IndexFaker).GetDescription())
                 .RuleFor(e => e.CzyAktywny, f => true);
@@ -127,8 +123,8 @@ namespace Quiz.Data.Data
         {
             var przedmiotFaker = new Faker<Przedmiot>()
                 .UseSeed(5566)
-                //.RuleFor(e => e.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(e => e.Nazwa, f => ((PrzedmiotEnum)f.IndexFaker).ToString())
+                .RuleFor(e => e.Opis, f => ((PrzedmiotEnum)f.IndexFaker).GetDescription())
                 .RuleFor(e => e.CzyAktywny, f => true);
 
             Przedmioty = przedmiotFaker.Generate(Enum.GetNames<PrzedmiotEnum>().Length);
@@ -139,7 +135,6 @@ namespace Quiz.Data.Data
         {
             var rolaFaker = new Faker<Rola>()
                 .UseSeed(6677)
-                //.RuleFor(e => e.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(e => e.Nazwa, f => ((RolaEnum)f.IndexFaker).ToString())
                 .RuleFor(e => e.CzyAktywny, f => true);
 
@@ -151,9 +146,8 @@ namespace Quiz.Data.Data
         {
             var stanowiskoFaker = new Faker<Stanowisko>()
                 .UseSeed(7788)
-                //.RuleFor(e => e.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(e => e.Nazwa, f => ((StanowiskoEnum)f.IndexFaker).ToString())
-                .RuleFor(e => e.Opis, f => ((StanowiskoEnum)f.IndexFaker).ToString())
+                .RuleFor(e => e.Opis, f => ((StanowiskoEnum)f.IndexFaker).GetDescription())
                 .RuleFor(e => e.CzyAktywny, f => true);
 
             Stanowiska = stanowiskoFaker.Generate(Enum.GetNames<StanowiskoEnum>().Length);
@@ -167,7 +161,6 @@ namespace Quiz.Data.Data
         {
             var adresFaker = new Faker<Adres>()
                 .UseSeed(9911)
-                //.RuleFor(a => a.Id, f => f.IndexFaker + 1)
                 .RuleFor(a => a.Panstwo, f => f.Address.Country())
                 .RuleFor(a => a.Miejscowosc, f => f.Address.City())
                 .RuleFor(a => a.Ulica, f => f.Address.StreetName())
@@ -187,7 +180,6 @@ namespace Quiz.Data.Data
 
             var pracownikFaker = new Faker<Pracownik>()
                 .UseSeed(1133)
-                //.RuleFor(p => p.Id, f => f.IndexFaker + 1)
                 .RuleFor(p => p.Imie, f => f.Person.FirstName)
                 .RuleFor(p => p.Nazwisko, f => f.Person.LastName)
                 .RuleFor(p => p.DataUrodzenia, f => f.Date.PastOffset(60, DateTime.Now.AddYears(-23)).Date)
@@ -211,7 +203,6 @@ namespace Quiz.Data.Data
             int i = 1;
             var oddzialFaker = new Faker<Oddzial>()
                 .UseSeed(3344)
-                //.RuleFor(o => o.Id, f => (byte)(f.IndexFaker + 1))
                 .RuleFor(o => o.Nazwa, f => ((OddzialEnum)f.IndexFaker).GetDescription())
                 .RuleFor(o => o.Opis, f => ((OddzialEnum)f.IndexFaker).ToString())
                 .RuleFor(o => o.PracownikId, f => i++)
@@ -229,14 +220,12 @@ namespace Quiz.Data.Data
 
             var uczenFaker = new Faker<Uczen>()
                 .UseSeed(2244)
-                //.RuleFor(u => u.Id, f => f.IndexFaker + 1)
                 .RuleFor(u => u.Imie, f => f.Person.FirstName)
                 .RuleFor(u => u.Nazwisko, f => f.Person.LastName)
                 .RuleFor(u => u.DataUrodzenia, f => f.Date.PastOffset(15, DateTime.Now.AddYears(-3)).Date)
                 .RuleFor(u => u.MiejsceUrodzenia, f => f.Person.Address.City)
                 .RuleFor(u => u.Pesel, f => f.Random.ReplaceNumbers("##########"))
                 //.RuleFor(u => u.AdresId, f => f.PickRandom(adresyIds))
-                .RuleFor(u => u.WychowawcaId, f => f.PickRandom(pracownicyIds))
                 .RuleFor(u => u.OddzialId, f => f.PickRandom(oddzialyIds))
                 .RuleFor(u => u.CzyAktywny, f => true);
 
@@ -302,7 +291,6 @@ namespace Quiz.Data.Data
             {
                 new Uzytkownik
                 {
-                    //Id = 1,
                     Email = "jan@kowalski.mail.com",
                     Imie = "Jan",
                     Nazwisko = "Kowalski",
@@ -312,7 +300,6 @@ namespace Quiz.Data.Data
                 },
                 new Uzytkownik
                 {
-                    //Id = 2,
                     Email = "roman@nowak.mail.com",
                     Imie = "Roman",
                     Nazwisko = "Nowak",
@@ -322,7 +309,6 @@ namespace Quiz.Data.Data
                 },
                 new Uzytkownik
                 {
-                    //Id = 3,
                     Email = "adam@wisniewski.mail.com",
                     Imie = "Adam",
                     Nazwisko = "Wiśniewski",

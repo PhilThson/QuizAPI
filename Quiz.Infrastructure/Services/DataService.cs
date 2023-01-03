@@ -122,8 +122,6 @@ namespace Quiz.Infrastructure.Services
                     $"o podanym identyfikatorze: {studentDto.BranchId}");
 
             var student = (Uczen)studentDto;
-            student.WychowawcaId = _dbContext.Oddzialy
-                .First(o => o.Id == studentDto.BranchId).PracownikId;
             await _dbContext.Uczniowie.AddAsync(student);
             await _dbContext.SaveChangesAsync();
 

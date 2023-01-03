@@ -9,11 +9,6 @@ namespace Quiz.Data.EntityConfiguration
         public void Configure(EntityTypeBuilder<Uczen> builder)
         {
             builder
-                .HasOne(u => u.Wychowawca)
-                .WithMany(p => p.PracownikUczniowie)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            builder
                 .HasOne(u => u.Oddzial)
                 .WithMany(o => o.OddzialUczniowie)
                 .OnDelete(DeleteBehavior.NoAction);

@@ -7,7 +7,6 @@ namespace Quiz.Data.Models
     {
         public Pracownik()
         {
-            PracownikUczniowie = new HashSet<Uczen>();
             PracownikOceny = new HashSet<Ocena>();
             PracownikDiagnozy = new HashSet<Diagnoza>();
             PracownikPracownicyAdresy = new HashSet<PracownicyAdresy>();
@@ -49,7 +48,6 @@ namespace Quiz.Data.Models
         public DateTime? DataKoncaZatrudnienia { get; set; }
 
         public virtual Oddzial PracownikOddzial { get; set; }
-        public virtual ICollection<Uczen> PracownikUczniowie { get; set; }
         public virtual ICollection<Ocena> PracownikOceny { get; set; }
         public virtual ICollection<Diagnoza> PracownikDiagnozy { get; set; }
         public virtual ICollection<PracownicyAdresy> PracownikPracownicyAdresy 
