@@ -51,6 +51,18 @@ namespace Quiz.Api.Controllers
             catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
+
+        [HttpDelete("pracownicy/{id}")]
+        public async Task<IActionResult> DeleteEmployeeById(int id)
+        {
+            try
+            {
+                await _dataService.DeleteEmployeeById(id);
+                return NoContent();
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
         #endregion
 
         #region Uczniowie
@@ -83,6 +95,18 @@ namespace Quiz.Api.Controllers
                     new { id = createdStudent.Id }, createdStudent);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpDelete("uczniowie/{id}")]
+        public async Task<IActionResult> DeleteStudentById(int id)
+        {
+            try
+            {
+                await _dataService.DeleteStudentById(id);
+                return NoContent();
+            }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
@@ -502,6 +526,55 @@ namespace Quiz.Api.Controllers
         {
             var branches = await _dataService.GetAllBranches();
             return Ok(branches);
+        }
+        #endregion
+
+        #region Role
+        [HttpGet("role")]
+        public async Task<IActionResult> GetAllRoles()
+        {
+            var roles = await _dataService.GetAllRoles();
+            return Ok(roles);
+        }
+        #endregion
+
+        #region Użytkownik
+        [HttpGet("uzytkownicy/{id}")]
+        public async Task<IActionResult> GetUserById([FromRoute] int userId)
+        {
+            try
+            {
+                var user = await _dataService.GetUserById(userId);
+                return Ok(user);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpGet("uzytkownicy")]
+        public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
+        {
+            try
+            {
+                var user = await _dataService.GetUserByEmail(email);
+                return Ok(user);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpPost("uzytkownicy")]
+        public async Task<IActionResult> AddUser([FromBody] CreateUserDto userDto)
+        {
+            try
+            {
+                var user = await _dataService.AddUser(userDto);
+                return CreatedAtAction(nameof(GetUserById),
+                    new { id = user.Id }, user);
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
     }

@@ -79,6 +79,16 @@ namespace Quiz.Infrastructure.Services
 
             return await GetEmployeeById(employeeToCreate.Id);
         }
+
+        public async Task DeleteEmployeeById(int id)
+        {
+            var employeeToDelete = await _dbContext.Pracownicy
+                .FirstOrDefaultAsync(e => e.Id == id) ??
+                throw new DataNotFoundException();
+
+            employeeToDelete.CzyAktywny = false;
+            await _dbContext.SaveChangesAsync();
+        }
         #endregion
 
         #region Students
@@ -126,6 +136,16 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return await GetStudentById(student.Id);
+        }
+
+        public async Task DeleteStudentById(int id)
+        {
+            var studentToDelete = await _dbContext.Uczniowie
+                .FirstOrDefaultAsync(u => u.Id == id) ??
+                throw new DataNotFoundException();
+
+            studentToDelete.CzyAktywny = false;
+            await _dbContext.SaveChangesAsync();
         }
 
         #endregion
@@ -931,6 +951,88 @@ namespace Quiz.Infrastructure.Services
                 Teacher = o.Pracownik.Imie + " " + o.Pracownik.Nazwisko
             })
             .ToListAsync();
+        #endregion
+
+        #region Role
+        public async Task<IEnumerable<RoleDto>> GetAllRoles() =>
+            await _dbContext.Role
+            .Select(r => new RoleDto
+            {
+                Id = r.Id,
+                Name = r.Nazwa,
+                Description = r.Opis
+            })
+            .ToListAsync();
+        #endregion
+
+        #region User
+        public async Task<UserDto> GetUserById(int userId) =>
+            await _dbContext.Uzytkownicy
+            .Where(u => u.Id == userId)
+            .Select(u => new UserDto
+            {
+                Id = u.Id,
+                FirstName = u.Imie,
+                LastName = u.Nazwisko,
+                Email = u.Email,
+                PasswordHash = u.HashHasla,
+                Role = new RoleDto
+                {
+                    Id = u.Rola.Id,
+                    Name = u.Rola.Nazwa,
+                    Description = u.Rola.Opis
+                }
+            })
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException("Nie znaleziono użytkownika " +
+                "o podanym identyfikatorze.");
+
+        public async Task<UserDto> GetUserByEmail(string email) =>
+            await _dbContext.Uzytkownicy
+            .Where(u => u.Email == email)
+            .Select(u => new UserDto
+            {
+                Id = u.Id,
+                FirstName = u.Imie,
+                LastName = u.Nazwisko,
+                Email = u.Email,
+                PasswordHash = u.HashHasla,
+                Role = new RoleDto
+                {
+                    Id = u.Rola.Id,
+                    Name = u.Rola.Nazwa,
+                    Description = u.Rola.Opis
+                }
+            })
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException("Nie znaleziono użytkownika " +
+                "o podanym adresie e-mail.");
+
+        public async Task<UserDto> AddUser(CreateUserDto userDto)
+        {
+            //Na wszelki wypadek, bo jest już atrybut Required
+            if (!userDto.RoleId.HasValue)
+                throw new DataValidationException("Użytkownik musi posiadać rolę");
+
+            if (_dbContext.Uzytkownicy.Any(u => u.Email == userDto.Email))
+                throw new DataValidationException("Podany adres e-mail " +
+                    "jest już zajęty");
+
+            var user = new Uzytkownik
+            {
+                Imie = userDto.FirstName,
+                Nazwisko = userDto.LastName,
+                Email = userDto.Email,
+                HashHasla = userDto.PasswordHash,
+                RolaId = userDto.RoleId.Value,
+                CzyAktywny = true
+            };
+
+            await _dbContext.Uzytkownicy.AddAsync(user);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetUserById(user.Id);
+        }
         #endregion
 
         #region Private Methods
