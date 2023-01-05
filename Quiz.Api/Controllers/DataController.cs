@@ -424,7 +424,7 @@ namespace Quiz.Api.Controllers
         }
         #endregion
 
-        #region Diagnoza
+        #region Diagnozy
         [HttpGet("diagnozy")]
         public async Task<IEnumerable<DiagnosisViewModel>> GetAllDiagnosis()
         {
@@ -538,7 +538,7 @@ namespace Quiz.Api.Controllers
         }
         #endregion
 
-        #region Użytkownik
+        #region Użytkownicy
         [HttpGet("uzytkownicy/{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] int userId)
         {

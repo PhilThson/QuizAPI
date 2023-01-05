@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Quiz.Data.Models
 {
     /// <summary>
-    /// Klasa będzie służyła do logowania aktywności użytkowników
+    /// Klasa służy do logowania aktywności użytkowników
     /// </summary>
     public class Migawka : BaseDictionaryEntity<long>
     {

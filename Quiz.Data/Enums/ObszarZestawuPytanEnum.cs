@@ -11,6 +11,10 @@ namespace Quiz.Data.Enums
         [Description("Trzeci obszar")]
         TrzeciObszar,
         [Description("Czwarty obszar")]
-        CzwartyObszar
+        CzwartyObszar,
+        [Description("Podstawowe wiadomości")]
+        PiatyObszar,
+        [Description("Percepcja słuchowa")]
+        SzostyObszar
     }
 }

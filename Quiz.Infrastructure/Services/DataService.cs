@@ -1010,7 +1010,7 @@ namespace Quiz.Infrastructure.Services
 
         public async Task<UserDto> AddUser(CreateUserDto userDto)
         {
-            //Na wszelki wypadek, bo jest już atrybut Required
+            //Na wszelki wypadek, bo już atrybut Required
             if (!userDto.RoleId.HasValue)
                 throw new DataValidationException("Użytkownik musi posiadać rolę");
 

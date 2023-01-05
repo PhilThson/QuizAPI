@@ -4,19 +4,19 @@ namespace Quiz.Data.Enums
 {
     public enum SkalaTrudnosciEnum
     {
-        [Description("Pierwsza skala")]
+        [Description("Łatwy")]
         A,
-        [Description("Druga skala")]
+        [Description("Średni")]
         B,
-        [Description("Trzecia skala")]
+        [Description("Trudny")]
         C,
-        [Description("Czwarta skala")]
+        [Description("Łatwy i średni")]
         AB,
-        [Description("Piąta skala")]
+        [Description("Łatwy i trudny")]
         AC,
-        [Description("Szósta skala")]
+        [Description("Średni i trudny")]
         BC,
-        [Description("Siódma skala")]
+        [Description("Łatwy, średni i trudny")]
         ABC
     }
 }

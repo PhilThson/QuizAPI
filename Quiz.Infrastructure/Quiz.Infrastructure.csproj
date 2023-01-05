@@ -18,4 +18,8 @@
     <ProjectReference Include="..\Quiz.Data\Quiz.Data.csproj" />
     <ProjectReference Include="..\Quiz.Shared\Quiz.Shared.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DinkToPdf" Version="1.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.11" />
+  </ItemGroup>
 </Project>
