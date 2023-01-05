@@ -164,11 +164,24 @@ namespace Quiz.Api.Controllers
 
         #region Zestawy pytań
         [HttpGet("zestawyPytan")]
-        public async Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets()
+        public async Task<IActionResult> GetAllQuestionsSets(
+            [FromQuery] byte? difficultyId)
         {
-            var questionsSets = await _dataService.GetAllQuestionsSets();
-            return questionsSets;
+            if (!difficultyId.HasValue)
+                return Ok(await _dataService.GetQuestionsSetsByCondition());
+            else
+                return Ok(await _dataService
+                    .GetQuestionsSetsByCondition(zp => zp.SkalaTrudnosciId == difficultyId));
         }
+
+        //[HttpGet("zestawyPytan")]
+        //public async Task<IActionResult> GetQuestionsSetsByDifficultyId(
+        //    [FromQuery] byte? difficultyId)
+        //{
+        //    var questionsSets = await _dataService
+        //        .GetQuestionsSetsByCondition(zp => zp.SkalaTrudnosciId == difficultyId);
+        //    return Ok(questionsSets);
+        //}
 
         [HttpGet("zestawyPytan/{id}", Name = nameof(GetQuestionsSetById))]
         public async Task<IActionResult> GetQuestionsSetById([FromRoute] int id)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Quiz.Data.DataAccess;
 using Quiz.Data.Helpers;
 using Quiz.Data.Models;
@@ -151,9 +152,14 @@ namespace Quiz.Infrastructure.Services
         #endregion
 
         #region QuestionsSet
-        public async Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets() =>
-            await _dbContext.ZestawyPytan
-            .Select(z => new QuestionsSetViewModel
+        public async Task<IEnumerable<QuestionsSetViewModel>>
+            GetQuestionsSetsByCondition(Expression<Func<ZestawPytan, bool>>? filter = null)
+        {
+            var query = _dbContext.ZestawyPytan.AsQueryable();
+
+            if (filter != null) query = query.Where(filter);
+
+            return await query.Select(z => new QuestionsSetViewModel
             {
                 Id = z.Id,
                 SkillDescription = z.OpisUmiejetnosci,
@@ -206,6 +212,7 @@ namespace Quiz.Infrastructure.Services
                     )
             })
             .ToListAsync();
+        }
 
         public async Task<QuestionsSetViewModel> GetQuestionsSetById(int id) =>
             await _dbContext.ZestawyPytan
@@ -291,7 +298,7 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.AddAsync(questionsSet);
             await _dbContext.SaveChangesAsync();
 
-            if(createQuestionsSet.QuestionsSetRatings.Count() > 0)
+            if (createQuestionsSet.QuestionsSetRatings.Count() > 0)
             {
                 var questionsSetRatings = new List<OcenaZestawuPytan>();
                 foreach (var rating in createQuestionsSet.QuestionsSetRatings)
@@ -325,7 +332,7 @@ namespace Quiz.Infrastructure.Services
             if (createQuestionsSet.AttachmentFiles?.Count() > 0)
             {
                 var attFiles = new List<KartaPracy>();
-                foreach(var attFile in createQuestionsSet.AttachmentFiles)
+                foreach (var attFile in createQuestionsSet.AttachmentFiles)
                     attFiles.Add(new KartaPracy
                     {
                         Nazwa = attFile.Name,
@@ -655,7 +662,7 @@ namespace Quiz.Infrastructure.Services
                 })
                 .FirstOrDefaultAsync()
                 ?? throw new DataNotFoundException();
-    
+
         public async Task<RatingViewModel> UpdateRating(RatingViewModel ratingVM)
         {
             var ratingFromDb = await _dbContext.OcenyZestawowPytan

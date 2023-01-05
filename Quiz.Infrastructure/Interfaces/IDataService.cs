@@ -1,4 +1,5 @@
-﻿using Quiz.Data.Models;
+﻿using System.Linq.Expressions;
+using Quiz.Data.Models;
 using Quiz.Shared.DTOs;
 using Quiz.Shared.DTOs.Read;
 using Quiz.Shared.ViewModels;
@@ -17,7 +18,9 @@ namespace Quiz.Infrastructure.Interfaces
         Task<StudentViewModel> AddStudent(CreateStudentDto studentDto);
         Task DeleteStudentById(int id);
 
-        Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets();
+        Task<IEnumerable<QuestionsSetViewModel>>
+            GetQuestionsSetsByCondition(
+                Expression<Func<ZestawPytan, bool>>? filter = null);
         Task<QuestionsSetViewModel> GetQuestionsSetById(int id);
         Task<string> UpdateSkillDescription(int id, string value);
         Task<AreaViewModel> UpdateQuestionsSetArea(int id, byte areaId);

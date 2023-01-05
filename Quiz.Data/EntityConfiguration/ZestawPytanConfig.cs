@@ -18,6 +18,8 @@ namespace Quiz.Data.EntityConfiguration
                 .HasOne(z => z.SkalaTrudnosci)
                 .WithMany(s => s.SkalaTrudnosciZestawyPytan)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasQueryFilter(z => z.CzyAktywny);
         }
     }
 }
