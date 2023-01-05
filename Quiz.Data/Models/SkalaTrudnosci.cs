@@ -8,10 +8,14 @@ namespace Quiz.Data.Models
         public SkalaTrudnosci()
         {
             SkalaTrudnosciZestawyPytan = new HashSet<ZestawPytan>();
+            SkalaTrudnosciDiagnozy = new HashSet<Diagnoza>();
         }
 
         [JsonIgnore]
         public virtual ICollection<ZestawPytan> SkalaTrudnosciZestawyPytan
         { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<Diagnoza> SkalaTrudnosciDiagnozy { get; set; }
     }
 }

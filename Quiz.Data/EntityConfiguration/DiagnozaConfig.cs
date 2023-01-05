@@ -22,7 +22,11 @@ namespace Quiz.Data.EntityConfiguration
                 .Property(m => m.DataPrzeprowadzenia)
                 .HasColumnType("datetime")
                 .HasComputedColumnSql("getdate()");
+
+            builder
+                .HasOne(d => d.DiagnozaSkalaTrudnosci)
+                .WithMany(s => s.SkalaTrudnosciDiagnozy)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
-
