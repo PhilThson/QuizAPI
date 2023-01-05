@@ -227,6 +227,7 @@ namespace Quiz.Data.Data
                 .RuleFor(u => u.Pesel, f => f.Random.ReplaceNumbers("##########"))
                 //.RuleFor(u => u.AdresId, f => f.PickRandom(adresyIds))
                 .RuleFor(u => u.OddzialId, f => f.PickRandom(oddzialyIds))
+                .RuleFor(u => u.NrOrzeczenia, f => f.Random.ReplaceNumbers("###/####/####"))
                 .RuleFor(u => u.CzyAktywny, f => true);
 
             Uczniowie = uczenFaker.Generate(100);

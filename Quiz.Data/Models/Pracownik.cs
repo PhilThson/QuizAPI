@@ -13,7 +13,7 @@ namespace Quiz.Data.Models
             PracownikPrzedmiotyPracownicy = new HashSet<PrzedmiotyPracownicy>();
         }
 
-        [Range(2800.0, 10000.0)]
+        [Range(0.0, 99999.0)]
         public decimal Pensja { get; set; }
 
         [Range(0, 500)]

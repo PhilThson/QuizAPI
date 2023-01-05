@@ -1,11 +1,10 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Quiz.Data.Models;
 
 namespace Quiz.Data.EntityConfiguration
 {
-	public class DiagnozaConfig : IEntityTypeConfiguration<Diagnoza>
+    public class DiagnozaConfig : IEntityTypeConfiguration<Diagnoza>
 	{
         public void Configure(EntityTypeBuilder<Diagnoza> builder)
         {
@@ -18,6 +17,11 @@ namespace Quiz.Data.EntityConfiguration
                 .HasOne(d => d.Uczen)
                 .WithMany(u => u.UczenDiagnozy)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder
+                .Property(m => m.DataPrzeprowadzenia)
+                .HasColumnType("datetime")
+                .HasComputedColumnSql("getdate()");
         }
     }
 }

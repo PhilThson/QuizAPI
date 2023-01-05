@@ -18,6 +18,10 @@ namespace Quiz.Data.Models
         [InverseProperty("OddzialUczniowie")]
         public virtual Oddzial Oddzial { get; set; }
 
+        [Required]
+        [StringLength(15)]
+        public string NrOrzeczenia { get; set; }
+
         //public int? AdresId { get; set; }
 
         //[ForeignKey(nameof(AdresId))]

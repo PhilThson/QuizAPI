@@ -1,11 +1,10 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Quiz.Data.Models.Base;
 
 namespace Quiz.Data.Models
 {
-	public class Diagnoza : BaseEntity<int>
+    public class Diagnoza : BaseEntity<int>
 	{
 		public Diagnoza()
 		{
@@ -27,6 +26,9 @@ namespace Quiz.Data.Models
         [ForeignKey(nameof(PracownikId))]
         [InverseProperty("PracownikDiagnozy")]
         public virtual Pracownik Pracownik { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime DataPrzeprowadzenia { get; set; }
 
         //Składany z opisów?
         //public string RozwojEmocjonalnoSpoleczny { get; set; }
