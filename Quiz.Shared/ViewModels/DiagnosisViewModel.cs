@@ -13,5 +13,6 @@ namespace Quiz.Shared.ViewModels
         public StudentViewModel Student { get; set; }
         public EmployeeViewModel Employee { get; set; }
         public IList<ResultViewModel>? Results { get; set; }
+        public DifficultyViewModel Difficulty { get; set; }
     }
 }

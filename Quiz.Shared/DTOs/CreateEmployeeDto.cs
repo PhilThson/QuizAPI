@@ -6,7 +6,7 @@ namespace Quiz.Shared.DTOs
 {
 	public class CreateEmployeeDto : CreatePersonDto
 	{
-		[Range(2800.0, 10000.0)]
+		[Range(0.0, 99999.0)]
 		public decimal Salary { get; set; }
 		[Range(0, 500)]
 		public int? DaysOfLeave { get; set; }
@@ -30,7 +30,7 @@ namespace Quiz.Shared.DTOs
 				DrugieImie = createEmployee.SecondName,
 				Nazwisko = createEmployee.LastName,
 				DataUrodzenia = createEmployee.DateOfBirth,
-				MiejsceUrodzenia = createEmployee.BirthCity,
+				MiejsceUrodzenia = createEmployee.PlaceOfBirth,
 				Pesel = createEmployee.PersonalNumber,
 				Pensja = createEmployee.Salary,
 				DniUrlopu = createEmployee.DaysOfLeave,

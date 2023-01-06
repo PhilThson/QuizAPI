@@ -18,9 +18,7 @@ namespace Quiz.Infrastructure.Interfaces
         Task<StudentViewModel> AddStudent(CreateStudentDto studentDto);
         Task DeleteStudentById(int id);
 
-        Task<IEnumerable<QuestionsSetViewModel>>
-            GetQuestionsSetsByCondition(
-                Expression<Func<ZestawPytan, bool>>? filter = null);
+        Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets();
         Task<QuestionsSetViewModel> GetQuestionsSetById(int id);
         Task<string> UpdateSkillDescription(int id, string value);
         Task<AreaViewModel> UpdateQuestionsSetArea(int id, byte areaId);

@@ -12,8 +12,6 @@ namespace Quiz.Data.Enums
         C,
         [Description("Łatwy i średni")]
         AB,
-        [Description("Łatwy i trudny")]
-        AC,
         [Description("Średni i trudny")]
         BC,
         [Description("Łatwy, średni i trudny")]

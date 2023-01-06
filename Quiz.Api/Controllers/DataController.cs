@@ -128,7 +128,7 @@ namespace Quiz.Api.Controllers
                 var question = await _dataService.GetQuestionById(id);
                 return Ok(question);
             }
-            catch(DataNotFoundException e) { return NotFound(); }
+            catch(DataNotFoundException e) { return NotFound(e.Message); }
         }
 
         [HttpPost("pytania")]
@@ -145,7 +145,7 @@ namespace Quiz.Api.Controllers
                     new { id = question.Id}, question);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpPut("pytania")]
@@ -158,7 +158,7 @@ namespace Quiz.Api.Controllers
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
 
@@ -167,21 +167,44 @@ namespace Quiz.Api.Controllers
         public async Task<IActionResult> GetAllQuestionsSets(
             [FromQuery] byte? difficultyId)
         {
-            if (!difficultyId.HasValue)
-                return Ok(await _dataService.GetQuestionsSetsByCondition());
-            else
-                return Ok(await _dataService
-                    .GetQuestionsSetsByCondition(zp => zp.SkalaTrudnosciId == difficultyId));
-        }
+            try
+            {
+                if (!difficultyId.HasValue)
+                    return Ok(await _dataService.GetAllQuestionsSets());
+                else
+                {
+                    var difficulty =
+                        await _dataService.GetDifficultyById(difficultyId.Value);
 
-        //[HttpGet("zestawyPytan")]
-        //public async Task<IActionResult> GetQuestionsSetsByDifficultyId(
-        //    [FromQuery] byte? difficultyId)
-        //{
-        //    var questionsSets = await _dataService
-        //        .GetQuestionsSetsByCondition(zp => zp.SkalaTrudnosciId == difficultyId);
-        //    return Ok(questionsSets);
-        //}
+                    var questionSets = await _dataService.GetAllQuestionsSets();
+
+                    //należy pobrać takie zestawy pytań, które w swojej skali trudności
+                    //zawierają skalę podaną w parametrze
+                    //np.: dla skali AC, powinno znaleźć zestawy pytań o skalach:
+                    // A lub C lub AC lub AB lub BC lub ABC
+                    //dla skali B, powinno zwrócić zestawy pytań o skalach:
+                    // B, AB, BC oraz ABC
+                    //tak samo dla skali ABC, powinno zwrócić wszystkie zestawy pytań
+                    //var questionsSetsToGet =
+                    //    questionSets.SelectMany(d => d.Difficulty.Name, (qs, c) =>
+                    //        new { QuestionsSet = qs, DifficultyLetter = c })
+                    //    .Where(a => difficulty.Name.Contains(a.DifficultyLetter))
+                    //    .Select(a => a.QuestionsSet)
+                    //    .Distinct();
+
+                    //wersja prostsza:
+                    //czyli np.:
+                    //dla skali BC zwróci
+                    // B, C oraz BC
+                    var questionsSetsToGet = questionSets
+                        .Where(qs => difficulty.Name.Contains(qs.Difficulty.Name));
+
+                    return Ok(questionsSetsToGet);
+                }
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(); }
+        }
 
         [HttpGet("zestawyPytan/{id}", Name = nameof(GetQuestionsSetById))]
         public async Task<IActionResult> GetQuestionsSetById([FromRoute] int id)
@@ -191,8 +214,8 @@ namespace Quiz.Api.Controllers
                 var questionsSet = await _dataService.GetQuestionsSetById(id);
                 return Ok(questionsSet);
             }
-            catch (DataNotFoundException e) { return NotFound(); }
-            catch (Exception e) { return BadRequest(); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpPost("zestawyPytan")]
@@ -206,7 +229,7 @@ namespace Quiz.Api.Controllers
                     new { id = createdQS.Id }, createdQS);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
 
@@ -223,7 +246,7 @@ namespace Quiz.Api.Controllers
                 return Ok(updated);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpPatch("zestawyPytan/{id}/area")]
@@ -276,8 +299,8 @@ namespace Quiz.Api.Controllers
                 var area = await _dataService.GetAreaById(id);
                 return Ok(area);
             }
-            catch (DataNotFoundException e) { return NotFound(); }
-            catch (Exception e) { return BadRequest(); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpPost("obszary")]
@@ -304,7 +327,7 @@ namespace Quiz.Api.Controllers
                 return Ok(updated);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpDelete("obszary/{id}")]
@@ -336,8 +359,8 @@ namespace Quiz.Api.Controllers
                 var difficulty = await _dataService.GetDifficultyById(id);
                 return Ok(difficulty);
             }
-            catch (DataNotFoundException e) { return NotFound(); }
-            catch (Exception e) { return BadRequest(); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpPost("skaleTrudnosci")]
@@ -405,7 +428,7 @@ namespace Quiz.Api.Controllers
                 return Ok(updated);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpGet("ocenyZestawuPytan")]

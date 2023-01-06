@@ -30,6 +30,8 @@ namespace Quiz.Infrastructure.Services
                 FirstName = p.Imie,
                 LastName = p.Nazwisko,
                 DateOfBirth = p.DataUrodzenia,
+                Salary = p.Pensja,
+                Email = p.Email,
                 PersonalNumber = p.Pesel
             })
             .ToListAsync();
@@ -101,6 +103,8 @@ namespace Quiz.Infrastructure.Services
                 FirstName = u.Imie,
                 LastName = u.Nazwisko,
                 DateOfBirth = u.DataUrodzenia,
+                PlaceOfBirth = u.MiejsceUrodzenia,
+                DisabilityCert = u.NrOrzeczenia,
                 PersonalNumber = u.Pesel
             })
             .ToListAsync();
@@ -113,6 +117,8 @@ namespace Quiz.Infrastructure.Services
                 FirstName = u.Imie,
                 LastName = u.Nazwisko,
                 DateOfBirth = u.DataUrodzenia,
+                PlaceOfBirth = u.MiejsceUrodzenia,
+                DisabilityCert = u.NrOrzeczenia,
                 PersonalNumber = u.Pesel,
                 Branch = new BranchDto
                 {
@@ -151,15 +157,10 @@ namespace Quiz.Infrastructure.Services
 
         #endregion
 
-        #region QuestionsSet
-        public async Task<IEnumerable<QuestionsSetViewModel>>
-            GetQuestionsSetsByCondition(Expression<Func<ZestawPytan, bool>>? filter = null)
-        {
-            var query = _dbContext.ZestawyPytan.AsQueryable();
-
-            if (filter != null) query = query.Where(filter);
-
-            return await query.Select(z => new QuestionsSetViewModel
+        #region QuestionsSets
+        public async Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets() =>
+            await _dbContext.ZestawyPytan
+            .Select(z => new QuestionsSetViewModel
             {
                 Id = z.Id,
                 SkillDescription = z.OpisUmiejetnosci,
@@ -197,6 +198,8 @@ namespace Quiz.Infrastructure.Services
                             QuestionsSetId = o.ZestawPytanId
                         })
                     ),
+                //przy pobieraniu zestawów pytań, NIE pobiera się
+                //zawartości załączników, tylko podstawowe informacje o nich
                 Attachments = new List<AttachmentViewModel>
                     (
                         z.ZestawPytanKartyPracy
@@ -212,7 +215,6 @@ namespace Quiz.Infrastructure.Services
                     )
             })
             .ToListAsync();
-        }
 
         public async Task<QuestionsSetViewModel> GetQuestionsSetById(int id) =>
             await _dbContext.ZestawyPytan
@@ -388,7 +390,7 @@ namespace Quiz.Infrastructure.Services
         }
         #endregion
 
-        #region Attachment
+        #region Attachments
         public async Task<AttachmentFileViewModel> GetAttachmentById(int id) =>
             await _dbContext.KartyPracy
             .Where(k => k.Id == id)
@@ -405,7 +407,7 @@ namespace Quiz.Infrastructure.Services
             ?? throw new DataNotFoundException();
         #endregion
 
-        #region Question
+        #region Questions
         public async Task<IEnumerable<QuestionViewModel>> GetAllQuestions() =>
             await _dbContext.Pytania
             .Select(p => new QuestionViewModel
@@ -489,7 +491,7 @@ namespace Quiz.Infrastructure.Services
         }
         #endregion
 
-        #region QuestionsSet Area
+        #region Areas
         public async Task<IEnumerable<AreaViewModel>> GetAllAreas() =>
             await _dbContext.ObszaryZestawowPytan
             .Select(o => new AreaViewModel
@@ -569,7 +571,7 @@ namespace Quiz.Infrastructure.Services
         }
         #endregion
 
-        #region Difficulty
+        #region Difficulties
         public async Task<IEnumerable<DifficultyViewModel>> GetAllDifficulties() =>
             await _dbContext.SkaleTrudnosci
             .Select(s => new DifficultyViewModel
@@ -650,7 +652,7 @@ namespace Quiz.Infrastructure.Services
         }
         #endregion
 
-        #region Rating
+        #region Ratings
         public async Task<RatingViewModel> GetRatingById(int id) =>
             await _dbContext.OcenyZestawowPytan
                 .Where(o => o.Id == id)
@@ -733,6 +735,12 @@ namespace Quiz.Infrastructure.Services
                     PersonalNumber = d.Uczen.Pesel
                 },
                 SchoolYear = d.RokSzkolny,
+                Difficulty = new DifficultyViewModel
+                {
+                    Id = d.DiagnozaSkalaTrudnosci.Id,
+                    Name = d.DiagnozaSkalaTrudnosci.Nazwa,
+                    Description = d.DiagnozaSkalaTrudnosci.Opis
+                },
                 Results = new List<ResultViewModel>
                     (
                         d.DiagnozaWyniki
@@ -788,6 +796,12 @@ namespace Quiz.Infrastructure.Services
                         PersonalNumber = d.Uczen.Pesel
                     },
                     SchoolYear = d.RokSzkolny,
+                    Difficulty = new DifficultyViewModel
+                    {
+                        Id = d.DiagnozaSkalaTrudnosci.Id,
+                        Name = d.DiagnozaSkalaTrudnosci.Nazwa,
+                        Description = d.DiagnozaSkalaTrudnosci.Opis
+                    },
                     Results = new List<ResultViewModel>
                     (
                         d.DiagnozaWyniki
@@ -823,6 +837,12 @@ namespace Quiz.Infrastructure.Services
                     $"Nie znaleziono ucznia o podanym identyfikatorze " +
                     $"({createDiagnosis.StudentId})");
 
+            if (!_dbContext.SkaleTrudnosci
+                .Any(s => s.Id == createDiagnosis.DifficultyId))
+                throw new DataValidationException(
+                    "Nie znaleziono skali trudności o podanym identyfikatorze " +
+                    $"({createDiagnosis.DifficultyId})");
+
             if (_dbContext.Diagnozy
                 .Any(d => d.UczenId == createDiagnosis.StudentId &&
                     d.RokSzkolny == createDiagnosis.SchoolYear))
@@ -834,6 +854,7 @@ namespace Quiz.Infrastructure.Services
                 PracownikId = createDiagnosis.EmployeeId,
                 UczenId = createDiagnosis.StudentId,
                 RokSzkolny = createDiagnosis.SchoolYear,
+                SkalaTrudnosciId = createDiagnosis.DifficultyId,
                 CzyAktywny = true
             };
 
@@ -972,7 +993,7 @@ namespace Quiz.Infrastructure.Services
             .ToListAsync();
         #endregion
 
-        #region User
+        #region Users
         public async Task<UserDto> GetUserById(int userId) =>
             await _dbContext.Uzytkownicy
             .Where(u => u.Id == userId)

@@ -6,6 +6,7 @@ namespace Quiz.Shared.DTOs
 		public int EmployeeId { get; set; }
 		public int StudentId { get; set; }
 		public string SchoolYear { get; set; }
+		public byte DifficultyId { get; set; }
 	}
 }
 
