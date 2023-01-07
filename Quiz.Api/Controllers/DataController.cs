@@ -11,12 +11,19 @@ namespace Quiz.Api.Controllers
     [ApiController]
     public class DataController : ControllerBase
     {
+        #region Pola prywatne
         private readonly IDataService _dataService;
+        private readonly IDocumentService _documentService;
+        #endregion
 
-        public DataController(IDataService dataService)
+        #region Konstruktor
+        public DataController(IDataService dataService,
+            IDocumentService documentService)
         {
             _dataService = dataService;
+            _documentService = documentService;
         }
+        #endregion
 
         #region Pracownicy
         [HttpGet("pracownicy")]
@@ -164,19 +171,18 @@ namespace Quiz.Api.Controllers
 
         #region Zestawy pytań
         [HttpGet("zestawyPytan")]
-        public async Task<IActionResult> GetAllQuestionsSets(
-            [FromQuery] byte? difficultyId)
+        public async Task<IActionResult> GetAllQuestionsSets([FromQuery] byte? difficultyId)
         {
             try
             {
                 if (!difficultyId.HasValue)
-                    return Ok(await _dataService.GetAllQuestionsSets());
+                    return Ok(await _dataService.GetQuestionsSetsByCondition());
                 else
                 {
                     var difficulty =
                         await _dataService.GetDifficultyById(difficultyId.Value);
 
-                    var questionSets = await _dataService.GetAllQuestionsSets();
+                    //var questionSets = await _dataService.GetAllQuestionsSets();
 
                     //należy pobrać takie zestawy pytań, które w swojej skali trudności
                     //zawierają skalę podaną w parametrze
@@ -192,18 +198,30 @@ namespace Quiz.Api.Controllers
                     //    .Select(a => a.QuestionsSet)
                     //    .Distinct();
 
-                    //wersja prostsza:
-                    //czyli np.:
-                    //dla skali BC zwróci
-                    // B, C oraz BC
-                    var questionsSetsToGet = questionSets
-                        .Where(qs => difficulty.Name.Contains(qs.Difficulty.Name));
+                    //wersja prostsza, czyli np.:
+                    //dla skali BC zwróci B, C oraz BC
+                    var questionsSets = await _dataService.GetQuestionsSetsByCondition(
+                        zp => difficulty.Name.Contains(zp.SkalaTrudnosci.Nazwa));
 
-                    return Ok(questionsSetsToGet);
+                    return Ok(questionsSets);
                 }
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpGet("zestawyPytan/zadane")]
+        public async Task<IActionResult> GetQuestionsSetsByIds(
+            [FromQuery] string askedQuestionSetsIds)
+        {
+            try
+            {
+                var listOfIds = askedQuestionSetsIds?.Split(',')?.Select(Int32.Parse)?.ToList();
+                var questionsSets = await _dataService.GetQuestionsSetsByCondition(
+                    zp => listOfIds.Contains(zp.Id));
+                return Ok(questionsSets);
+            }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpGet("zestawyPytan/{id}", Name = nameof(GetQuestionsSetById))]
@@ -611,6 +629,67 @@ namespace Quiz.Api.Controllers
             catch (DataValidationException e) { return BadRequest(e.Message); }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
+        }
+        #endregion
+
+        #region Raporty
+        [HttpGet("raporty/{diagnosisId}")]
+        public async Task<IActionResult> GetReportByDiagnosisId([FromRoute] int diagnosisId)
+        {
+            try
+            {
+                var diagnosisToPdf = await GetDiagnosisToPdf(diagnosisId);
+                var pdfDocument = _documentService
+                    .GeneratePdfFromRazorView<DiagnosisToPdfViewModel>(
+                        "/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
+                var reportDto = new ReportDto
+                {
+                    Name = $"{diagnosisId}_" +
+                        $"{diagnosisToPdf.Employee.LastName}_" +
+                        $"{diagnosisToPdf.Student.LastName}_" +
+                        $"{diagnosisToPdf.SchoolYear}.pdf",
+                    Content = pdfDocument
+                };
+                return Ok(reportDto);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        private async Task<DiagnosisToPdfViewModel> GetDiagnosisToPdf(int diagnosisId)
+        {
+            var diagnosis = await _dataService.GetDiagnosisById(diagnosisId);
+
+            var askedQuestionSetsIds = new List<int>();
+
+            if (diagnosis.Results?.Count > 0)
+                askedQuestionSetsIds = diagnosis.Results
+                    .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
+
+            var questionsSets = await _dataService.GetQuestionsSetsByCondition(
+                    zp => askedQuestionSetsIds.Contains(zp.Id));
+
+            var masteredQSIds = diagnosis.Results.Where(d => d.RatingLevel > 4)
+                .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
+            var toImproveQSIds = diagnosis.Results.Where(d => d.RatingLevel < 5)
+                .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
+
+            return new DiagnosisToPdfViewModel
+            {
+                Id = diagnosis.Id,
+                Student = diagnosis.Student,
+                Employee = diagnosis.Employee,
+                CreatedDate = diagnosis.CreatedDate,
+                Difficulty = diagnosis.Difficulty,
+                SchoolYear = diagnosis.SchoolYear,
+                Results = diagnosis.Results,
+                QuestionsSetsMastered =
+                    questionsSets.Where(qs => masteredQSIds.Contains(qs.Id))
+                    .OrderBy(qs => qs.Area.Name).ToList(),
+                QuestionsSetsToImprove =
+                    questionsSets.Where(qs => toImproveQSIds.Contains(qs.Id))
+                    .OrderBy(qs => qs.Area.Name).ToList(),
+            };
         }
         #endregion
     }

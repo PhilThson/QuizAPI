@@ -158,9 +158,16 @@ namespace Quiz.Infrastructure.Services
         #endregion
 
         #region QuestionsSets
-        public async Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets() =>
-            await _dbContext.ZestawyPytan
-            .Select(z => new QuestionsSetViewModel
+        public async Task<IEnumerable<QuestionsSetViewModel>>
+            GetQuestionsSetsByCondition(
+                Expression<Func<ZestawPytan, bool>>? filter = null)
+        {
+            var query = _dbContext.ZestawyPytan.AsQueryable();
+
+            if (filter != null)
+                query = query.Where(filter);
+
+            return await query.Select(z => new QuestionsSetViewModel
             {
                 Id = z.Id,
                 SkillDescription = z.OpisUmiejetnosci,
@@ -215,6 +222,7 @@ namespace Quiz.Infrastructure.Services
                     )
             })
             .ToListAsync();
+        }
 
         public async Task<QuestionsSetViewModel> GetQuestionsSetById(int id) =>
             await _dbContext.ZestawyPytan
@@ -756,7 +764,8 @@ namespace Quiz.Infrastructure.Services
                                 QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId
                             }
                         })
-                    )
+                    ),
+                CreatedDate = d.DataPrzeprowadzenia
             })
             .ToListAsync();
 
@@ -793,6 +802,8 @@ namespace Quiz.Infrastructure.Services
                         FirstName = d.Uczen.Imie,
                         LastName = d.Uczen.Nazwisko,
                         DateOfBirth = d.Uczen.DataUrodzenia,
+                        PlaceOfBirth = d.Uczen.MiejsceUrodzenia,
+                        DisabilityCert = d.Uczen.NrOrzeczenia,
                         PersonalNumber = d.Uczen.Pesel
                     },
                     SchoolYear = d.RokSzkolny,
@@ -817,10 +828,12 @@ namespace Quiz.Infrastructure.Services
                                 QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId
                             }
                         })
-                    )
+                    ),
+                    CreatedDate = d.DataPrzeprowadzenia
                 })
                 .FirstOrDefaultAsync() ??
-                throw new DataNotFoundException();
+                throw new DataNotFoundException("Nie znaleziono diagnozy o podanym " +
+                    $"identyfikatorze {id}");
 
         public async Task<DiagnosisViewModel> AddDiagnosis(
             CreateDiagnosisDto createDiagnosis)

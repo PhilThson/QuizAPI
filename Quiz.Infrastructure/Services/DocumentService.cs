@@ -68,8 +68,8 @@ namespace Quiz.Infrastructure.Services
                 PagesCount = true,
                 HtmlContent = htmlContent,
                 WebSettings = { DefaultEncoding = "utf-8" },
-                HeaderSettings = { FontSize = 10, Right = "Page [page] of [toPage]", Line = true },
-                FooterSettings = { FontSize = 8, Center = "PDF demo from JeminPro", Line = true },
+                HeaderSettings = { FontSize = 10, Right = "Strona [page] z [toPage]", Line = true },
+                FooterSettings = { FontSize = 8, Center = "Placówka Oświatowa - Diagnoza", Line = true },
             };
 
             var htmlToPdfDocument = new HtmlToPdfDocument()

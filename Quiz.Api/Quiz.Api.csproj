@@ -28,6 +28,7 @@
   <ItemGroup>
     <None Remove="Microsoft.EntityFrameworkCore.SqlServer" />
     <None Remove="Bogus" />
+    <None Remove="Views\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quiz.Data\Quiz.Data.csproj">
@@ -37,4 +38,19 @@
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
   </ItemGroup>
+
+<!--    <ItemGroup>
+    <None Update="libwkhtmltox.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="libwkhtmltox.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="libwkhtmltox.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>-->
+    <ItemGroup>
+      <Folder Include="Views\" />
+    </ItemGroup>
 </Project>

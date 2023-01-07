@@ -32,6 +32,8 @@ internal class Program
 
         //Wykorzystanie biblioteki DinkToPdf jako wrappera na 'wkhtmltopdf'
         //silnika do zamiany kodu html na dokkument PDF
+        //wkhtmltopdf - command line tools to render HTML into PDF and various
+        //image formats using the Qt WebKit rendering engine
         builder.Services.AddSingleton(typeof(IConverter),
             new SynchronizedConverter(new PdfTools()));
 

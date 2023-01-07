@@ -33,4 +33,3 @@ namespace Quiz.Data.Helpers
         }
     }
 }
-

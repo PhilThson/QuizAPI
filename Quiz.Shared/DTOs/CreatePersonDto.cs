@@ -16,6 +16,7 @@ namespace Quiz.Shared.DTOs
         public string? LastName { get; set; }
         [StringLength(256)]
         public string? PlaceOfBirth { get; set; }
+        [Required]
         public DateTime? DateOfBirth { get; set; }
         [Required]
         [StringLength(11)]

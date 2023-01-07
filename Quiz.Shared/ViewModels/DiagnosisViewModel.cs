@@ -14,5 +14,6 @@ namespace Quiz.Shared.ViewModels
         public EmployeeViewModel Employee { get; set; }
         public IList<ResultViewModel>? Results { get; set; }
         public DifficultyViewModel Difficulty { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }
