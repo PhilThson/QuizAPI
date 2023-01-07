@@ -5,6 +5,10 @@ using Quiz.Infrastructure.Services;
 using Quiz.Data.Data;
 using DinkToPdf;
 using DinkToPdf.Contracts;
+using Quiz.Api.Utilities;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 internal class Program
 {
@@ -14,6 +18,22 @@ internal class Program
 
         //do generowania dokumentów PDF za pomocą RazorView
         builder.Services.AddMvc().AddControllersAsServices();
+
+        //Ładowanie zewnętrznych bibliotek
+        var wkHtmlToPdfFileName = "libwkhtmltox";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            wkHtmlToPdfFileName += ".so";
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            wkHtmlToPdfFileName += ".dylib";
+
+        var wkHtmlToPdfPath = Path.Combine(
+            new string[] {builder.Environment.ContentRootPath, wkHtmlToPdfFileName});
+        //Console.WriteLine(wkHtmlToPdfPath);
+        //Console.WriteLine(string.Join(", ", Directory.EnumerateFiles(Directory.GetCurrentDirectory())));
+        var context = new CustomAssemblyLoadContext();
+        context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(),
+            wkHtmlToPdfPath));
+
         //generowanie odpowiedzi Json
         builder.Services.AddControllers()
             .AddJsonOptions(o => o.JsonSerializerOptions.DefaultIgnoreCondition

@@ -61,6 +61,7 @@ namespace Quiz.Infrastructure.Services
                 Orientation = Orientation.Portrait,
                 PaperSize = PaperKind.A4,
                 Margins = new MarginSettings { Top = 18, Bottom = 18 },
+                //DocumentTitle =
             };
 
             var objectSettings = new ObjectSettings
@@ -68,6 +69,7 @@ namespace Quiz.Infrastructure.Services
                 PagesCount = true,
                 HtmlContent = htmlContent,
                 WebSettings = { DefaultEncoding = "utf-8" },
+                //można dodać atrybut FontName = "Arial" dla ustawień nagłowka i stopki
                 HeaderSettings = { FontSize = 10, Right = "Strona [page] z [toPage]", Line = true },
                 FooterSettings = { FontSize = 8, Center = "Placówka Oświatowa - Diagnoza", Line = true },
             };

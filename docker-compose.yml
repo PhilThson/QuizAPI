@@ -2,8 +2,8 @@ version: '3.4'
 
 services:
   sql_server:
-    image: "mcr.microsoft.com/mssql/server:2019-latest"
-    container_name: sql_server
+    image: "mcr.microsoft.com/azure-sql-edge:latest"
+    container_name: SQLEdge
     ports:
       - "1433:1433" 
     environment:
@@ -13,6 +13,6 @@ services:
   quiz.api:
     depends_on:
       - sql_server
-    image: "container4phil/quizapi:second"
+    image: "container4phil/quizapi:fifth"
     ports:
       - "5111:5111" 

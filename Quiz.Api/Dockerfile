@@ -1,6 +1,7 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
@@ -16,6 +17,28 @@ RUN dotnet build "Quiz.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "Quiz.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+
+#RUN apt-get update \
+#    && apt-get install -y --no-install-recommends \
+#        zlib1g \
+#        fontconfig \
+#        libfreetype6 \
+#        libx11-6 \
+#        libxext6 \
+#        libxrender1 \
+#        libjpeg62-turbo
+
+RUN apt-get update && apt-get install -y --allow-unauthenticated libgdiplus
+#RUN apt-get install -y apt-utils
+#RUN apt-get install -y zlib1g
+#RUN apt-get install -y fontconfig
+#RUN apt-get install -y libc6-dev
+#RUN apt-get install -y libxrender1
+#RUN apt-get install -y libfontconfig1
+#RUN apt-get install -y libxext-dev
+#RUN ln -s /usr/lib/libgdiplus.so/usr/lib/gdiplus.dll
+
 
 FROM base AS final
 WORKDIR /app

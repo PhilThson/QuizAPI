@@ -29,6 +29,10 @@
     <None Remove="Microsoft.EntityFrameworkCore.SqlServer" />
     <None Remove="Bogus" />
     <None Remove="Views\" />
+    <None Remove="Utilities\" />
+    <None Remove="libwkhtmltox.dll" />
+    <None Remove="libwkhtmltox.dylib" />
+    <None Remove="libwkhtmltox.so" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quiz.Data\Quiz.Data.csproj">
@@ -52,5 +56,17 @@
   </ItemGroup>-->
     <ItemGroup>
       <Folder Include="Views\" />
+      <Folder Include="Utilities\" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Include="libwkhtmltox.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <EmbeddedResource Include="libwkhtmltox.dylib">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <EmbeddedResource Include="libwkhtmltox.so">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
     </ItemGroup>
 </Project>
