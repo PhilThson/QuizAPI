@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure;
 using Quiz.Infrastructure.Interfaces;
@@ -630,8 +631,8 @@ namespace Quiz.Api.Controllers
         #endregion
 
         #region Raporty
-        [HttpGet("raporty/{diagnosisId}")]
-        public async Task<IActionResult> GetDiagnosisReport([FromRoute] int diagnosisId)
+        [HttpPost("raporty/{diagnosisId}")]
+        public async Task<IActionResult> GenerateDiagnosisReport([FromRoute] int diagnosisId)
         {
             try
             {
@@ -640,8 +641,21 @@ namespace Quiz.Api.Controllers
                 if (diagnosis.ReportId.HasValue)
                     return Ok(await _dataService.GetReportById(diagnosis.ReportId.Value));
 
-                var report = await _dataService.AddDiagnosisReport(diagnosis);
+                var baseReport = await _dataService.AddDiagnosisReport(diagnosis);
 
+                return Ok(baseReport);
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (DataValidationException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpGet("raporty/{reportId}")]
+        public async Task<IActionResult> GetDiagnosisReport([FromRoute] int reportId)
+        {
+            try
+            {
+                var report = await _dataService.GetReportById(reportId);
                 return Ok(report);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }

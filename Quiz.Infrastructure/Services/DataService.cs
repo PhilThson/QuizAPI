@@ -886,7 +886,7 @@ namespace Quiz.Infrastructure.Services
             return await GetDiagnosisById(diagnosis.Id);
         }
 
-        public async Task<ReportDto> AddDiagnosisReport(DiagnosisViewModel diagnosis)
+        public async Task<BaseReportDto> AddDiagnosisReport(DiagnosisViewModel diagnosis)
         {
             if (_dbContext.Raporty.Any(r => r.DiagnozaId == diagnosis.Id))
                 throw new DataValidationException("Diagnoza już posiada wygenerowany raport");
@@ -910,7 +910,7 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.Raporty.AddAsync(report);
             await _dbContext.SaveChangesAsync();
 
-            return await GetReportById(report.Id);
+            return await GetBaseReportById(report.Id);
         }
 
         private async Task<DiagnosisToPdfViewModel> GetDiagnosisToPdfViewModel(
@@ -1150,12 +1150,27 @@ namespace Quiz.Infrastructure.Services
         #region Reports
         public async Task<ReportDto> GetReportById(int reportId) =>
             await _dbContext.Raporty
+            .Where(r => r.Id == reportId)
             .Select(r => new ReportDto
             {
                 Id = r.Id,
                 Name = r.Nazwa,
                 Description = r.Opis,
                 Content = r.Zawartosc,
+                Size = r.Rozmiar
+            })
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException("Nie znaleziono raportu " +
+                $"o podanym identyfikatorze ({reportId})");
+
+        private async Task<BaseReportDto> GetBaseReportById(int reportId) =>
+            await _dbContext.Raporty
+            .Where(r => r.Id == reportId)
+            .Select(r => new BaseReportDto
+            {
+                Id = r.Id,
+                Name = r.Nazwa,
+                Description = r.Opis,
                 Size = r.Rozmiar
             })
             .FirstOrDefaultAsync() ??

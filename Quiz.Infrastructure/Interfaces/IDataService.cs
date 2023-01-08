@@ -58,7 +58,7 @@ namespace Quiz.Infrastructure.Interfaces
         Task<DiagnosisViewModel> GetDiagnosisById(int id);
         Task<DiagnosisViewModel> AddDiagnosis(
             CreateDiagnosisDto createDiagnosis);
-        Task<ReportDto> AddDiagnosisReport(DiagnosisViewModel diagnosis);
+        Task<BaseReportDto> AddDiagnosisReport(DiagnosisViewModel diagnosis);
 
         Task<ResultViewModel> GetResultById(long id);
         Task<ResultViewModel> AddDiagnosisResult(CreateResultDto createResult);
