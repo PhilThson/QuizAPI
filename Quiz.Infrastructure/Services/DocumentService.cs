@@ -1,11 +1,10 @@
-﻿using System;
-using DinkToPdf;
+﻿using DinkToPdf;
 using DinkToPdf.Contracts;
 using Quiz.Infrastructure.Interfaces;
 
 namespace Quiz.Infrastructure.Services
 {
-	public class DocumentService : IDocumentService
+    public class DocumentService : IDocumentService
 	{
         private readonly IConverter _converter;
         private readonly IRazorRendererService _razorRendererService;
@@ -66,7 +65,8 @@ namespace Quiz.Infrastructure.Services
                 WebSettings = { DefaultEncoding = "utf-8" },
                 //można dodać atrybut FontName = "Arial" dla ustawień nagłowka i stopki
                 //HeaderSettings = { FontSize = 10, Right = "Strona [page] z [toPage]", Line = true },
-                FooterSettings = { FontSize = 8, Center = "Placówka Oświatowa - Diagnoza", Line = true },
+                FooterSettings = { FontName = "Helvetica", FontSize = 8, 
+                    Center = "Placówka Oświatowa - Diagnoza", Line = true },
             };
 
             var htmlToPdfDocument = new HtmlToPdfDocument()
