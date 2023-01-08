@@ -13,12 +13,19 @@ namespace Quiz.Infrastructure.Services
 {
     public class DataService : IDataService
     {
+        #region Private fields
         private readonly QuizDbContext _dbContext;
+        private readonly IDocumentService _documentService;
+        #endregion
 
-        public DataService(QuizDbContext dbContext)
+        #region Constructor
+        public DataService(QuizDbContext dbContext, 
+            IDocumentService documentService)
         {
             _dbContext = dbContext;
+            _documentService = documentService;
         }
+        #endregion
 
         #region Employees
         //lista wszystkich elementów zwraca tylko podstawowe dane
@@ -765,7 +772,8 @@ namespace Quiz.Infrastructure.Services
                             }
                         })
                     ),
-                CreatedDate = d.DataPrzeprowadzenia
+                CreatedDate = d.DataPrzeprowadzenia,
+                ReportId = d.DiagnozaRaport.Id
             })
             .ToListAsync();
 
@@ -829,7 +837,8 @@ namespace Quiz.Infrastructure.Services
                             }
                         })
                     ),
-                    CreatedDate = d.DataPrzeprowadzenia
+                    CreatedDate = d.DataPrzeprowadzenia,
+                    ReportId = d.DiagnozaRaport.Id
                 })
                 .FirstOrDefaultAsync() ??
                 throw new DataNotFoundException("Nie znaleziono diagnozy o podanym " +
@@ -875,6 +884,68 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return await GetDiagnosisById(diagnosis.Id);
+        }
+
+        public async Task<ReportDto> AddDiagnosisReport(DiagnosisViewModel diagnosis)
+        {
+            if (_dbContext.Raporty.Any(r => r.DiagnozaId == diagnosis.Id))
+                throw new DataValidationException("Diagnoza już posiada wygenerowany raport");
+
+            var diagnosisToPdf = await GetDiagnosisToPdfViewModel(diagnosis);
+            var pdfDocument = _documentService
+                .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
+
+            var report = new Raport
+            {
+                Nazwa = $"{diagnosis.Id}_" +
+                    $"{diagnosisToPdf.Employee.LastName}_" +
+                    $"{diagnosisToPdf.Student.LastName}_" +
+                    $"{diagnosisToPdf.SchoolYear}.pdf",
+                Zawartosc = pdfDocument,
+                Rozmiar = pdfDocument.Length,
+                DiagnozaId = diagnosis.Id,
+                CzyAktywny = true
+            };
+
+            await _dbContext.Raporty.AddAsync(report);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetReportById(report.Id);
+        }
+
+        private async Task<DiagnosisToPdfViewModel> GetDiagnosisToPdfViewModel(
+            DiagnosisViewModel diagnosis)
+        {
+            var askedQuestionSetsIds = new List<int>();
+
+            if (diagnosis.Results?.Count > 0)
+                askedQuestionSetsIds = diagnosis.Results
+                    .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
+
+            var questionsSets = await GetQuestionsSetsByCondition(
+                    zp => askedQuestionSetsIds.Contains(zp.Id));
+
+            var masteredQSIds = diagnosis.Results.Where(d => d.RatingLevel > 4)
+                .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
+            var toImproveQSIds = diagnosis.Results.Where(d => d.RatingLevel < 5)
+                .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
+
+            return new DiagnosisToPdfViewModel
+            {
+                Id = diagnosis.Id,
+                Student = diagnosis.Student,
+                Employee = diagnosis.Employee,
+                CreatedDate = diagnosis.CreatedDate,
+                Difficulty = diagnosis.Difficulty,
+                SchoolYear = diagnosis.SchoolYear,
+                Results = diagnosis.Results,
+                QuestionsSetsMastered =
+                    questionsSets.Where(qs => masteredQSIds.Contains(qs.Id))
+                    .OrderBy(qs => qs.Area.Name).ToList(),
+                QuestionsSetsToImprove =
+                    questionsSets.Where(qs => toImproveQSIds.Contains(qs.Id))
+                    .OrderBy(qs => qs.Area.Name).ToList(),
+            };
         }
         #endregion
 
@@ -1074,6 +1145,22 @@ namespace Quiz.Infrastructure.Services
 
             return await GetUserById(user.Id);
         }
+        #endregion
+
+        #region Reports
+        public async Task<ReportDto> GetReportById(int reportId) =>
+            await _dbContext.Raporty
+            .Select(r => new ReportDto
+            {
+                Id = r.Id,
+                Name = r.Nazwa,
+                Description = r.Opis,
+                Content = r.Zawartosc,
+                Size = r.Rozmiar
+            })
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException("Nie znaleziono raportu " +
+                $"o podanym identyfikatorze ({reportId})");
         #endregion
 
         #region Private Methods

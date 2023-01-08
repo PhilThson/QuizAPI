@@ -13,15 +13,12 @@ namespace Quiz.Api.Controllers
     {
         #region Pola prywatne
         private readonly IDataService _dataService;
-        private readonly IDocumentService _documentService;
         #endregion
 
         #region Konstruktor
-        public DataController(IDataService dataService,
-            IDocumentService documentService)
+        public DataController(IDataService dataService)
         {
             _dataService = dataService;
-            _documentService = documentService;
         }
         #endregion
 
@@ -634,63 +631,22 @@ namespace Quiz.Api.Controllers
 
         #region Raporty
         [HttpGet("raporty/{diagnosisId}")]
-        public async Task<IActionResult> GetReportByDiagnosisId([FromRoute] int diagnosisId)
+        public async Task<IActionResult> GetDiagnosisReport([FromRoute] int diagnosisId)
         {
             try
             {
-                var diagnosisToPdf = await GetDiagnosisToPdf(diagnosisId);
-                var pdfDocument = _documentService
-                    .GeneratePdfFromRazorView<DiagnosisToPdfViewModel>(
-                        "/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
+                var diagnosis = await _dataService.GetDiagnosisById(diagnosisId);
 
-                var reportDto = new ReportDto
-                {
-                    Name = $"{diagnosisId}_" +
-                        $"{diagnosisToPdf.Employee.LastName}_" +
-                        $"{diagnosisToPdf.Student.LastName}_" +
-                        $"{diagnosisToPdf.SchoolYear}.pdf",
-                    Content = pdfDocument
-                };
-                return Ok(reportDto);
+                if (diagnosis.ReportId.HasValue)
+                    return Ok(await _dataService.GetReportById(diagnosis.ReportId.Value));
+
+                var report = await _dataService.AddDiagnosisReport(diagnosis);
+
+                return Ok(report);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (DataValidationException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
-        }
-
-        private async Task<DiagnosisToPdfViewModel> GetDiagnosisToPdf(int diagnosisId)
-        {
-            var diagnosis = await _dataService.GetDiagnosisById(diagnosisId);
-
-            var askedQuestionSetsIds = new List<int>();
-
-            if (diagnosis.Results?.Count > 0)
-                askedQuestionSetsIds = diagnosis.Results
-                    .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
-
-            var questionsSets = await _dataService.GetQuestionsSetsByCondition(
-                    zp => askedQuestionSetsIds.Contains(zp.Id));
-
-            var masteredQSIds = diagnosis.Results.Where(d => d.RatingLevel > 4)
-                .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
-            var toImproveQSIds = diagnosis.Results.Where(d => d.RatingLevel < 5)
-                .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
-
-            return new DiagnosisToPdfViewModel
-            {
-                Id = diagnosis.Id,
-                Student = diagnosis.Student,
-                Employee = diagnosis.Employee,
-                CreatedDate = diagnosis.CreatedDate,
-                Difficulty = diagnosis.Difficulty,
-                SchoolYear = diagnosis.SchoolYear,
-                Results = diagnosis.Results,
-                QuestionsSetsMastered =
-                    questionsSets.Where(qs => masteredQSIds.Contains(qs.Id))
-                    .OrderBy(qs => qs.Area.Name).ToList(),
-                QuestionsSetsToImprove =
-                    questionsSets.Where(qs => toImproveQSIds.Contains(qs.Id))
-                    .OrderBy(qs => qs.Area.Name).ToList(),
-            };
         }
         #endregion
     }

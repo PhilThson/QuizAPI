@@ -58,6 +58,7 @@ namespace Quiz.Infrastructure.Interfaces
         Task<DiagnosisViewModel> GetDiagnosisById(int id);
         Task<DiagnosisViewModel> AddDiagnosis(
             CreateDiagnosisDto createDiagnosis);
+        Task<ReportDto> AddDiagnosisReport(DiagnosisViewModel diagnosis);
 
         Task<ResultViewModel> GetResultById(long id);
         Task<ResultViewModel> AddDiagnosisResult(CreateResultDto createResult);
@@ -72,5 +73,7 @@ namespace Quiz.Infrastructure.Interfaces
         Task<UserDto> GetUserById(int userId);
         Task<UserDto> GetUserByEmail(string email);
         Task<UserDto> AddUser(CreateUserDto userDto);
+
+        Task<ReportDto> GetReportById(int reportId);
     }
 }

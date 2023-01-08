@@ -42,6 +42,9 @@ namespace Quiz.Data.Models
 
         [JsonIgnore]
         public virtual ICollection<Wynik> DiagnozaWyniki { get; set; }
+
+        [JsonIgnore]
+        public virtual Raport? DiagnozaRaport { get; set; }
     }
 }
 

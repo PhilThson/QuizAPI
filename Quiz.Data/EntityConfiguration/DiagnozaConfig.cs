@@ -27,6 +27,11 @@ namespace Quiz.Data.EntityConfiguration
                 .HasOne(d => d.DiagnozaSkalaTrudnosci)
                 .WithMany(s => s.SkalaTrudnosciDiagnozy)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder
+                .HasOne(d => d.DiagnozaRaport)
+                .WithOne(r => r.Diagnoza)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

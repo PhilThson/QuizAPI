@@ -9,23 +9,18 @@ namespace Quiz.Infrastructure.Services
 	{
         private readonly IConverter _converter;
         private readonly IRazorRendererService _razorRendererService;
-        private readonly IDataService _dataService;
 
 
         public DocumentService(
             IConverter converter,
-            IRazorRendererService razorRendererService,
-            IDataService dataService)
+            IRazorRendererService razorRendererService)
         {
             _converter = converter;
             _razorRendererService = razorRendererService;
-            _dataService = dataService;
         }
 
         public byte[] GeneratePdfFromRazorView<T>(string partialName, T viewModel)
         {
-            //var invoiceViewModel = GetInvoiceModel();
-            //var partialName = "/Views/PdfTemplate/InvoiceDetails.cshtml";
             var htmlContent = _razorRendererService.RenderPartialToString(partialName, viewModel);
 
             return GeneratePdf(htmlContent);
@@ -70,7 +65,7 @@ namespace Quiz.Infrastructure.Services
                 HtmlContent = htmlContent,
                 WebSettings = { DefaultEncoding = "utf-8" },
                 //można dodać atrybut FontName = "Arial" dla ustawień nagłowka i stopki
-                HeaderSettings = { FontSize = 10, Right = "Strona [page] z [toPage]", Line = true },
+                //HeaderSettings = { FontSize = 10, Right = "Strona [page] z [toPage]", Line = true },
                 FooterSettings = { FontSize = 8, Center = "Placówka Oświatowa - Diagnoza", Line = true },
             };
 

@@ -32,6 +32,7 @@ namespace Quiz.Data.DataAccess
         public DbSet<Uzytkownik> Uzytkownicy { get; set; }
         public DbSet<Wynik> Wyniki { get; set; }
         public DbSet<ZestawPytan> ZestawyPytan { get; set; }
+        public DbSet<Raport> Raporty { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
