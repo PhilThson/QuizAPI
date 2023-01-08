@@ -642,6 +642,7 @@ namespace Quiz.Api.Controllers
                 var pdfDocument = _documentService
                     .GeneratePdfFromRazorView<DiagnosisToPdfViewModel>(
                         "/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
+
                 var reportDto = new ReportDto
                 {
                     Name = $"{diagnosisId}_" +
