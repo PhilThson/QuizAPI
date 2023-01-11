@@ -146,7 +146,7 @@ namespace Quiz.Api.Controllers
 
                 var question = await _dataService.AddQuestion(questionVM);
 
-                return CreatedAtRoute(nameof(GetQuestionById),
+                return CreatedAtAction(nameof(GetQuestionById),
                     new { id = question.Id}, question);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
@@ -163,6 +163,19 @@ namespace Quiz.Api.Controllers
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+
+        [HttpDelete("pytania/{id}")]
+        public async Task<IActionResult> DeleteQuestionById(int id)
+        {
+            try
+            {
+                await _dataService.DeleteQuestionById(id);
+                return NoContent();
+            }
+            catch (DataNotFoundException e) { return BadRequest(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion

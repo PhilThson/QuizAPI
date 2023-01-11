@@ -15,15 +15,16 @@ namespace Quiz.Infrastructure.Services
     {
         #region Private fields
         private readonly QuizDbContext _dbContext;
-        private readonly IDocumentService _documentService;
+        //private readonly IDocumentService _documentService;
         #endregion
 
         #region Constructor
-        public DataService(QuizDbContext dbContext, 
-            IDocumentService documentService)
+        public DataService(QuizDbContext dbContext
+            //,IDocumentService documentService
+            )
         {
             _dbContext = dbContext;
-            _documentService = documentService;
+            //_documentService = documentService;
         }
         #endregion
 
@@ -457,7 +458,8 @@ namespace Quiz.Infrastructure.Services
             {
                 Tresc = questionVM.Content,
                 Opis = questionVM.Description,
-                ZestawPytanId = questionVM.QuestionsSetId
+                ZestawPytanId = questionVM.QuestionsSetId,
+                CzyAktywny = true
             };
 
             await _dbContext.Pytania.AddAsync(question);
@@ -484,6 +486,17 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return await GetQuestionById(questionFromDb.Id);
+        }
+
+        public async Task DeleteQuestionById(int id)
+        {
+            var question = await _dbContext.Pytania
+                .FirstOrDefaultAsync(p => p.Id == id) ??
+                    throw new DataNotFoundException("Nie znaleziono pytania " +
+                        $"o podanym identyfikatorze ({id})");
+
+            question.CzyAktywny = false;
+            await _dbContext.SaveChangesAsync();
         }
         #endregion
 
@@ -892,8 +905,9 @@ namespace Quiz.Infrastructure.Services
                 throw new DataValidationException("Diagnoza już posiada wygenerowany raport");
 
             var diagnosisToPdf = await GetDiagnosisToPdfViewModel(diagnosis);
-            var pdfDocument = _documentService
-                .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
+            //Zamockowanie do developersko na iOS'ie
+            //var pdfDocument = _documentService
+            //    .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
 
             var report = new Raport
             {
@@ -901,8 +915,8 @@ namespace Quiz.Infrastructure.Services
                     $"{diagnosisToPdf.Employee.LastName}_" +
                     $"{diagnosisToPdf.Student.LastName}_" +
                     $"{diagnosisToPdf.SchoolYear}.pdf",
-                Zawartosc = pdfDocument,
-                Rozmiar = pdfDocument.Length,
+                Zawartosc = new byte[100],
+                Rozmiar = 100,
                 DiagnozaId = diagnosis.Id,
                 CzyAktywny = true
             };

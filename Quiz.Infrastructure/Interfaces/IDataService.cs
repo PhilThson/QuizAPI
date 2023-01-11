@@ -33,6 +33,7 @@ namespace Quiz.Infrastructure.Interfaces
         Task<QuestionViewModel> GetQuestionById(int id);
         Task<QuestionViewModel> AddQuestion(QuestionViewModel questionVM);
         Task<QuestionViewModel> UpdateQuestion(QuestionViewModel questionVM);
+        Task DeleteQuestionById(int id);
 
         Task<IEnumerable<AreaViewModel>> GetAllAreas();
         Task<AreaViewModel> GetAreaById(byte id);
