@@ -15,16 +15,16 @@ namespace Quiz.Infrastructure.Services
     {
         #region Private fields
         private readonly QuizDbContext _dbContext;
-        //private readonly IDocumentService _documentService;
+        private readonly IDocumentService _documentService;
         #endregion
 
         #region Constructor
         public DataService(QuizDbContext dbContext
-            //,IDocumentService documentService
+            , IDocumentService documentService
             )
         {
             _dbContext = dbContext;
-            //_documentService = documentService;
+            _documentService = documentService;
         }
         #endregion
 
@@ -905,9 +905,10 @@ namespace Quiz.Infrastructure.Services
                 throw new DataValidationException("Diagnoza już posiada wygenerowany raport");
 
             var diagnosisToPdf = await GetDiagnosisToPdfViewModel(diagnosis);
-            //Zamockowanie do developersko na iOS'ie
-            //var pdfDocument = _documentService
-            //    .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
+            //Zamockowanie do developersko na iOS'ie:
+            //zakomentować + dodać pustą tablicę bajtów i rozmiar
+            var pdfDocument = _documentService
+                .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
 
             var report = new Raport
             {
@@ -915,8 +916,8 @@ namespace Quiz.Infrastructure.Services
                     $"{diagnosisToPdf.Employee.LastName}_" +
                     $"{diagnosisToPdf.Student.LastName}_" +
                     $"{diagnosisToPdf.SchoolYear}.pdf",
-                Zawartosc = new byte[100],
-                Rozmiar = 100,
+                Zawartosc = pdfDocument,
+                Rozmiar = pdfDocument.Length,
                 DiagnozaId = diagnosis.Id,
                 CzyAktywny = true
             };
