@@ -1,11 +1,10 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using Quiz.Data.Models;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Quiz.Shared.DTOs
 {
-	public class CreatePersonDto
+    public class CreatePersonDto
 	{
+        public int Id { get; set; }
         [Required]
         [StringLength(20)]
         public string? FirstName { get; set; }
