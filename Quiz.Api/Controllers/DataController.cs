@@ -68,6 +68,19 @@ namespace Quiz.Api.Controllers
             catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
+
+        [HttpPut("pracownicy")]
+        public async Task<IActionResult> UpdateEmployee(CreateEmployeeDto employeeDto)
+        {
+            try
+            {
+                var updated = await _dataService.UpdateEmployee(employeeDto);
+                return Ok(updated);
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
         #endregion
 
         #region Uczniowie
@@ -112,6 +125,19 @@ namespace Quiz.Api.Controllers
                 await _dataService.DeleteStudentById(id);
                 return NoContent();
             }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpPut("uczniowie")]
+        public async Task<IActionResult> UpdateStudent(CreateStudentDto studentDto)
+        {
+            try
+            {
+                var updated = await _dataService.UpdateStudent(studentDto);
+                return Ok(updated);
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }

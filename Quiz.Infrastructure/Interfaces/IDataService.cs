@@ -12,11 +12,13 @@ namespace Quiz.Infrastructure.Interfaces
         Task<EmployeeViewModel> GetEmployeeById(int id);
         Task<EmployeeViewModel> AddEmployee(CreateEmployeeDto employeeDto);
         Task DeleteEmployeeById(int id);
+        Task<EmployeeViewModel> UpdateEmployee(CreateEmployeeDto employeeDto);
 
         Task<IEnumerable<StudentViewModel>> GetAllStudents();
         Task<StudentViewModel> GetStudentById(int id);
         Task<StudentViewModel> AddStudent(CreateStudentDto studentDto);
         Task DeleteStudentById(int id);
+        Task<StudentViewModel> UpdateStudent(CreateStudentDto studentDto);
 
         //Task<IEnumerable<QuestionsSetViewModel>> GetAllQuestionsSets();
         Task<IEnumerable<QuestionsSetViewModel>> GetQuestionsSetsByCondition(

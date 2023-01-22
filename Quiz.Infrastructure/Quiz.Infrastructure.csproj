@@ -9,10 +9,12 @@
   <ItemGroup>
     <None Remove="Interfaces\" />
     <None Remove="Services\" />
+    <None Remove="Helpers\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />
     <Folder Include="Services\" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quiz.Data\Quiz.Data.csproj" />

@@ -1,10 +1,12 @@
 ﻿using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Quiz.Data.DataAccess;
 using Quiz.Data.Helpers;
 using Quiz.Data.Models;
 using Quiz.Data.Models.Base;
 using Quiz.Infrastructure.Interfaces;
+using Quiz.Infrastructure.Helpers;
 using Quiz.Shared.DTOs;
 using Quiz.Shared.DTOs.Read;
 using Quiz.Shared.ViewModels;
@@ -67,7 +69,8 @@ namespace Quiz.Infrastructure.Services
                     Id = p.Stanowisko.Id,
                     Name = p.Stanowisko.Nazwa
                 },
-                DateOfEmployment = p.DataZatrudnienia
+                DateOfEmployment = p.DataZatrudnienia,
+                EmploymentEndDate = p.DataKoncaZatrudnienia
             })
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
@@ -84,6 +87,8 @@ namespace Quiz.Infrastructure.Services
                 throw new DataNotFoundException("Nie znaleziono stanowiska " +
                     $"o podanym identyfikatorze ({employeeDto.PositionId})");
 
+            ValidatePersonalNumber(employeeDto.PersonalNumber);
+
             var employeeToCreate = (Pracownik)employeeDto;
             await _dbContext.Pracownicy.AddAsync(employeeToCreate);
             await _dbContext.SaveChangesAsync();
@@ -99,6 +104,34 @@ namespace Quiz.Infrastructure.Services
 
             employeeToDelete.CzyAktywny = false;
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<EmployeeViewModel> UpdateEmployee(CreateEmployeeDto employeeDto)
+        {
+            var employee = await _dbContext.Pracownicy
+                .FirstOrDefaultAsync(p => p.Id == employeeDto.Id) ??
+                throw new DataNotFoundException(
+                    $"Nie znaleziono pracownika o podanym identyfikatorze ({employeeDto.Id})");
+
+            if (employee == employeeDto)
+                return await GetEmployeeById(employee.Id);
+
+            if (!_dbContext.Etaty
+                .Any(e => e.Id == employeeDto.JobId))
+                throw new DataNotFoundException("Nie znaleziono etatu o podanym" +
+                    $"identyfikatorze ({employeeDto.JobId})");
+
+            if (!_dbContext.Stanowiska
+                .Any(s => s.Id == employeeDto.PositionId))
+                throw new DataNotFoundException("Nie znaleziono stanowiska " +
+                    $"o podanym identyfikatorze ({employeeDto.PositionId})");
+
+            ValidatePersonalNumber(employeeDto.PersonalNumber);
+
+            employee.FillEmployeeModel(employeeDto);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetEmployeeById(employee.Id);
         }
         #endregion
 
@@ -146,6 +179,8 @@ namespace Quiz.Infrastructure.Services
                 throw new DataNotFoundException("Nie znaleziono oddziału " +
                     $"o podanym identyfikatorze: {studentDto.BranchId}");
 
+            ValidatePersonalNumber(studentDto.PersonalNumber);
+
             var student = (Uczen)studentDto;
             await _dbContext.Uczniowie.AddAsync(student);
             await _dbContext.SaveChangesAsync();
@@ -161,6 +196,28 @@ namespace Quiz.Infrastructure.Services
 
             studentToDelete.CzyAktywny = false;
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<StudentViewModel> UpdateStudent(CreateStudentDto studentDto)
+        {
+            var student = await _dbContext.Uczniowie
+                .FirstOrDefaultAsync(u => u.Id == studentDto.Id) ??
+                throw new DataNotFoundException(
+                    $"Nie znaleziono ucznia o podanym identyfikatorze ({studentDto.Id})");
+
+            if (student == studentDto)
+                return await GetStudentById(student.Id);
+
+            if (!_dbContext.Oddzialy.Any(o => o.Id == studentDto.BranchId))
+                throw new DataValidationException("Nie znaleziono oddziału " +
+                    $"o podanym identyfikatorze: {studentDto.BranchId}");
+
+            ValidatePersonalNumber(studentDto.PersonalNumber);
+
+            student.FillStudentModel(studentDto);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetStudentById(student.Id);
         }
 
         #endregion
@@ -1210,6 +1267,12 @@ namespace Quiz.Infrastructure.Services
                 .Where(e => e.Nazwa == name)
                 .Select(e => e.Id)
                 .FirstOrDefaultAsync() ?? throw new DataNotFoundException();
+
+        private void ValidatePersonalNumber(string personalNumber)
+        {
+            if (!(personalNumber.Length == 11 && Regex.IsMatch(personalNumber, @"^\d+$")))
+                throw new DataValidationException("Wprowadzono nieprawidłowy numer PESEL");
+        }
         #endregion
     }
 }

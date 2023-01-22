@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using Quiz.Data.Models;
+using static Quiz.Data.Helpers.CommonExtensions;
 
 namespace Quiz.Shared.DTOs
 {
@@ -25,6 +26,28 @@ namespace Quiz.Shared.DTOs
 				OddzialId = createStudent.BranchId.Value,
 				CzyAktywny = true
 			};
+
+		public static bool operator ==(Uczen u, CreateStudentDto s)
+		{
+			if(u is null)
+			{
+				if (s is null)
+					return true;
+				return false;
+			}
+			return
+				u.Imie.ToLower() == s.FirstName.ToLower() &&
+				SafeToLower(u.DrugieImie) == SafeToLower(s.SecondName) &&
+				u.Nazwisko.ToLower() == s.LastName.ToLower() &&
+				SafeToLower(u.MiejsceUrodzenia) == SafeToLower(s.PlaceOfBirth) &&
+				u.DataUrodzenia == s.DateOfBirth &&
+				u.Pesel == s.PersonalNumber &&
+				SafeToLower(u.NrOrzeczenia) == SafeToLower(s.DisabilityCert) &&
+				u.OddzialId == s.BranchId;
+        }
+
+		public static bool operator !=(Uczen u, CreateStudentDto s) =>
+			!(u == s);
     }
 }
 
