@@ -57,6 +57,9 @@ namespace Quiz.Infrastructure.Services
                 DateOfBirth = p.DataUrodzenia,
                 PersonalNumber = p.Pesel,
                 Salary = p.Pensja,
+                DaysOfLeave = p.DniUrlopu,
+                HourlyRate = p.WymiarGodzinowy,
+                Overtime = p.Nadgodziny,
                 Email = p.Email,
                 PhoneNumber = p.NrTelefonu,
                 Job = new JobDto()
@@ -70,13 +73,45 @@ namespace Quiz.Infrastructure.Services
                     Name = p.Stanowisko.Nazwa
                 },
                 DateOfEmployment = p.DataZatrudnienia,
-                EmploymentEndDate = p.DataKoncaZatrudnienia
+                EmploymentEndDate = p.DataKoncaZatrudnienia,
+                Addresses = new List<AddressDto>
+                (
+                    p.PracownikPracownicyAdresy
+                    .Select(a => new AddressDto
+                    {
+                        Id = a.Adres.Id,
+                        Country = a.Adres.Panstwo,
+                        City = a.Adres.Miejscowosc,
+                        Street = a.Adres.Ulica,
+                        HouseNumber = a.Adres.NumerDomu,
+                        FlatNumber = a.Adres.NumerMieszkania,
+                        PostalCode = a.Adres.KodPocztowy
+                    })
+                )
             })
             .FirstOrDefaultAsync()
             ?? throw new DataNotFoundException();
 
         public async Task<EmployeeViewModel> AddEmployee(CreateEmployeeDto employeeDto)
         {
+            var existingEmployee = await _dbContext.Pracownicy
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p =>
+                    p.Imie == employeeDto.FirstName &&
+                    p.Nazwisko == employeeDto.LastName &&
+                    p.Pesel == employeeDto.PersonalNumber
+                );
+
+            if (existingEmployee is not null)
+            {
+                if (existingEmployee.CzyAktywny)
+                    throw new AlreadyExistsException("Wybrany pracownik już isnieje");
+
+                existingEmployee.CzyAktywny = true;
+                await _dbContext.SaveChangesAsync();
+                return await GetEmployeeById(existingEmployee.Id);
+            }
+
             if (!_dbContext.Etaty
                 .Any(e => e.Id == employeeDto.JobId))
                 throw new DataNotFoundException("Nie znaleziono etatu o podanym" +
@@ -90,7 +125,22 @@ namespace Quiz.Infrastructure.Services
             ValidatePersonalNumber(employeeDto.PersonalNumber);
 
             var employeeToCreate = (Pracownik)employeeDto;
+
             await _dbContext.Pracownicy.AddAsync(employeeToCreate);
+
+            if (employeeDto.AddressesIds?.Count > 0)
+            {
+                foreach (var addressId in employeeDto.AddressesIds)
+                {
+                    _dbContext.PracownicyAdresy.Add(
+                        new PracownicyAdresy
+                        {
+                            Pracownik = employeeToCreate,
+                            AdresId = addressId
+                        });
+                }
+            }
+
             await _dbContext.SaveChangesAsync();
 
             return await GetEmployeeById(employeeToCreate.Id);
@@ -152,6 +202,7 @@ namespace Quiz.Infrastructure.Services
 
         public async Task<StudentViewModel> GetStudentById(int id) =>
             await _dbContext.Uczniowie
+            .Where(u => u.Id == id)
             .Select(u => new StudentViewModel
             {
                 Id = u.Id,
@@ -175,6 +226,24 @@ namespace Quiz.Infrastructure.Services
 
         public async Task<StudentViewModel> AddStudent(CreateStudentDto studentDto)
         {
+            var existingStudent = await _dbContext.Uczniowie
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u =>
+                    u.Imie == studentDto.FirstName &&
+                    u.Nazwisko == studentDto.LastName &&
+                    u.Pesel == studentDto.PersonalNumber
+                );
+
+            if(existingStudent is not null)
+            {
+                if (existingStudent.CzyAktywny)
+                    throw new AlreadyExistsException("Wybrany uczeń już isnieje");
+
+                existingStudent.CzyAktywny = true;
+                await _dbContext.SaveChangesAsync();
+                return await GetStudentById(existingStudent.Id);
+            }
+
             if (!_dbContext.Oddzialy.Any(o => o.Id == studentDto.BranchId))
                 throw new DataNotFoundException("Nie znaleziono oddziału " +
                     $"o podanym identyfikatorze: {studentDto.BranchId}");
@@ -218,6 +287,103 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
 
             return await GetStudentById(student.Id);
+        }
+
+        #endregion
+
+        #region Addresses
+
+        public async Task<IEnumerable<AddressDto>> GetAllAddresses() =>
+            await _dbContext.Adresy
+            .Select(a => new AddressDto
+            {
+                Id = a.Id,
+                Country = a.Panstwo,
+                City = a.Miejscowosc,
+                Street = a.Ulica,
+                HouseNumber = a.NumerDomu,
+                FlatNumber = a.NumerMieszkania,
+                PostalCode = a.KodPocztowy
+            })
+            .ToListAsync();
+
+        public async Task<AddressDto> GetAddressById(int id) =>
+            await _dbContext.Adresy
+            .Where(a => a.Id == id)
+            .Select(a => new AddressDto
+            {
+                Id = a.Id,
+                Country = a.Panstwo,
+                City = a.Miejscowosc,
+                Street = a.Ulica,
+                HouseNumber = a.NumerDomu,
+                FlatNumber = a.NumerMieszkania,
+                PostalCode = a.KodPocztowy
+            })
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException(
+                $"Nie znaleziono adresu o podanym identyfikatorze ({id})");
+
+        public async Task<AddressDto> AddAddress(AddressDto addressDto)
+        {
+            var existingAddress = await _dbContext.Adresy
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(a =>
+                    a.Panstwo == addressDto.Country &&
+                    a.Miejscowosc == addressDto.City &&
+                    a.Ulica == addressDto.Street &&
+                    a.NumerDomu == addressDto.HouseNumber &&
+                    a.NumerMieszkania == addressDto.FlatNumber &&
+                    a.KodPocztowy == addressDto.PostalCode);
+
+            if(existingAddress is not null)
+            {
+                if (existingAddress.CzyAktywny)
+                    throw new AlreadyExistsException(
+                        "Adres o podanych paramterach już istnieje");
+
+                existingAddress.CzyAktywny = true;
+                await _dbContext.SaveChangesAsync();
+                return await GetAddressById(existingAddress.Id);
+            }
+
+            var address = (Adres)addressDto;
+            await _dbContext.Adresy.AddAsync(address);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetAddressById(address.Id);
+        }
+
+        public async Task<AddressDto> UpdateAddress(AddressDto addressDto)
+        {
+            var address = await _dbContext.Adresy
+                .FirstOrDefaultAsync(a => a.Id == addressDto.Id) ??
+                throw new DataNotFoundException(
+                    $"Nie znaleziono adresu o podanym identyfikatorze ({addressDto.Id})");
+
+            if (address == addressDto)
+                return await GetAddressById(address.Id);
+
+            address.FillAddressModel(addressDto);
+            await _dbContext.SaveChangesAsync();
+
+            return await GetAddressById(address.Id);
+        }
+
+        public async Task DeleteAddressById(int id)
+        {
+            var address = await _dbContext.Adresy
+                .Include(a => a.AdresPracownicyAdresy)
+                //.ThenInclude(pa => pa.Pracownik)
+                .FirstOrDefaultAsync(a => a.Id == id) ??
+                throw new DataNotFoundException(
+                    $"Nie znaleziono adresu o podanym identyfikatorze ({id})");
+
+            if(address.AdresPracownicyAdresy.Count() > 0)
+                _dbContext.PracownicyAdresy.RemoveRange(address.AdresPracownicyAdresy);
+
+            address.CzyAktywny = false;
+            await _dbContext.SaveChangesAsync();
         }
 
         #endregion
@@ -1118,7 +1284,8 @@ namespace Quiz.Infrastructure.Services
             .Select(e => new JobDto
             {
                 Id = e.Id,
-                Name = e.Nazwa
+                Name = e.Nazwa,
+                Description = e.Opis
             })
             .ToListAsync();
         #endregion
@@ -1129,7 +1296,8 @@ namespace Quiz.Infrastructure.Services
             .Select(s => new PositionDto
             {
                 Id = s.Id,
-                Name = s.Nazwa
+                Name = s.Nazwa,
+                Description = s.Opis
             })
             .ToListAsync();
         #endregion

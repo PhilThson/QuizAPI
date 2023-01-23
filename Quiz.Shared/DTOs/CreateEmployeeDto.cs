@@ -22,6 +22,7 @@ namespace Quiz.Shared.DTOs
 		[Required]
 		public DateTime? DateOfEmployment { get; set; }
 		public DateTime? EmploymentEndDate { get; set; }
+        public List<int>? AddressesIds { get; set; }
 
         public static explicit operator Pracownik(CreateEmployeeDto createEmployee)
         {
@@ -62,10 +63,6 @@ namespace Quiz.Shared.DTOs
                 SafeToLower(p.MiejsceUrodzenia) == SafeToLower(e.PlaceOfBirth) &&
                 p.DataUrodzenia == e.DateOfBirth &&
                 p.Pesel == e.PersonalNumber &&
-                p.Pensja == e.Salary &&
-                p.DniUrlopu == e.DaysOfLeave &&
-                p.WymiarGodzinowy == e.HourlyRate &&
-                p.Nadgodziny == e.Overtime &&
                 p.NrTelefonu == e.PhoneNumber &&
                 p.Email == e.Email &&
                 p.EtatId == e.JobId &&

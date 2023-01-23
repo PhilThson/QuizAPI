@@ -7,7 +7,7 @@ namespace Quiz.Data.Models
     {
         public Adres()
         {
-            AdresUczniowie = new HashSet<Uczen>();
+            //AdresUczniowie = new HashSet<Uczen>();
             AdresPracownicyAdresy = new HashSet<PracownicyAdresy>();
         }
 
@@ -29,7 +29,7 @@ namespace Quiz.Data.Models
         [MaxLength(10)]
         public string KodPocztowy { get; set; }
 
-        public virtual ICollection<Uczen> AdresUczniowie { get; set; }
+        //public virtual ICollection<Uczen> AdresUczniowie { get; set; }
         public virtual ICollection<PracownicyAdresy> AdresPracownicyAdresy 
         { get; set; }
 
@@ -41,7 +41,7 @@ namespace Quiz.Data.Models
         {
             return !(a1 == a2);
         }
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is Adres)) return false;
             Adres a = (Adres)obj;

@@ -143,6 +143,65 @@ namespace Quiz.Api.Controllers
         }
         #endregion
 
+        #region Adresy
+        [HttpGet("adresy")]
+        public async Task<IActionResult> GetAllAddresses()
+        {
+            var addresses = await _dataService.GetAllAddresses();
+            return Ok(addresses);
+        }
+
+        [HttpGet("adresy/{id}")]
+        public async Task<IActionResult> GetAddressById([FromRoute] int id)
+        {
+            try
+            {
+                var address = await _dataService.GetAddressById(id);
+                return Ok(address);
+            }
+            catch(DataNotFoundException e) { return NotFound(e.Message); }
+            catch(Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpPost("adresy")]
+        public async Task<IActionResult> AddAddress(AddressDto addressDto)
+        {
+            try
+            {
+                var createdAddress = await _dataService.AddAddress(addressDto);
+                return CreatedAtAction(nameof(GetAddressById),
+                    new { id = createdAddress.Id }, createdAddress);
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpDelete("adresy/{id}")]
+        public async Task<IActionResult> DeleteAddressById([FromRoute] int id)
+        {
+            try
+            {
+                await _dataService.DeleteAddressById(id);
+                return NoContent();
+            }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+        }
+
+        [HttpPut("adresy")]
+        public async Task<IActionResult> UpdateAddress(AddressDto addressDto)
+        {
+            try
+            {
+                var updated = await _dataService.UpdateAddress(addressDto);
+                return Ok(updated);
+            }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+        #endregion
+
         #region Pytania
         [HttpGet("pytania")]
         public async Task<IEnumerable<QuestionViewModel>> GetAllQuestions()

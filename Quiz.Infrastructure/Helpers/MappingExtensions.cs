@@ -37,6 +37,16 @@ namespace Quiz.Infrastructure.Helpers
 			u.NrOrzeczenia = createStudent.DisabilityCert;
 			u.OddzialId = createStudent.BranchId.Value;
         }
+
+        public static void FillAddressModel(this Adres a, AddressDto addressDto)
+        {
+            a.Panstwo = addressDto.Country;
+            a.Miejscowosc = addressDto.City;
+            a.Ulica = addressDto.Street;
+            a.NumerDomu = addressDto.HouseNumber;
+            a.NumerMieszkania = addressDto.FlatNumber;
+            a.KodPocztowy = addressDto.PostalCode;
+        }
     }
 }
 
