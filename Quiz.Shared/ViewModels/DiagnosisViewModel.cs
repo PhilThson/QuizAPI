@@ -12,5 +12,6 @@ namespace Quiz.Shared.ViewModels
         public DifficultyViewModel Difficulty { get; set; }
         public DateTime CreatedDate { get; set; }
         public int? ReportId { get; set; }
+        public string Institution { get; set; }
     }
 }

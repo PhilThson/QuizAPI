@@ -10,6 +10,7 @@ using Quiz.Infrastructure.Helpers;
 using Quiz.Shared.DTOs;
 using Quiz.Shared.DTOs.Read;
 using Quiz.Shared.ViewModels;
+using System.Net;
 
 namespace Quiz.Infrastructure.Services
 {
@@ -149,8 +150,15 @@ namespace Quiz.Infrastructure.Services
         public async Task DeleteEmployeeById(int id)
         {
             var employeeToDelete = await _dbContext.Pracownicy
+                .Include(p => p.PracownikPracownicyAdresy)
                 .FirstOrDefaultAsync(e => e.Id == id) ??
                 throw new DataNotFoundException();
+
+            //nie są usuwane adresy pracownika, ponieważ jest to zachowanie
+            //historii pracownika
+            //if (employeeToDelete.PracownikPracownicyAdresy.Count() > 0)
+            //    _dbContext.PracownicyAdresy.RemoveRange
+            //        (employeeToDelete.PracownikPracownicyAdresy);
 
             employeeToDelete.CzyAktywny = false;
             await _dbContext.SaveChangesAsync();
@@ -994,28 +1002,14 @@ namespace Quiz.Infrastructure.Services
                     PersonalNumber = d.Uczen.Pesel
                 },
                 SchoolYear = d.RokSzkolny,
+                Institution = d.PlacowkaOswiatowa,
                 Difficulty = new DifficultyViewModel
                 {
                     Id = d.DiagnozaSkalaTrudnosci.Id,
                     Name = d.DiagnozaSkalaTrudnosci.Nazwa,
                     Description = d.DiagnozaSkalaTrudnosci.Opis
                 },
-                Results = new List<ResultViewModel>
-                    (
-                        d.DiagnozaWyniki
-                        .Select(w => new ResultViewModel
-                        {
-                            Id = w.Id,
-                            Notes = w.Notatki,
-                            RatingLevel = w.PoziomOceny,
-                            QuestionsSetRating = new RatingViewModel
-                            {
-                                Id = w.OcenaZestawuPytan.Id,
-                                RatingDescription = w.OcenaZestawuPytan.OpisOceny,
-                                QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId
-                            }
-                        })
-                    ),
+                //Nie są zwracane rezultaty diagnozy na liście wszystkich diagnóz
                 CreatedDate = d.DataPrzeprowadzenia,
                 ReportId = d.DiagnozaRaport.Id
             })
@@ -1059,6 +1053,7 @@ namespace Quiz.Infrastructure.Services
                         PersonalNumber = d.Uczen.Pesel
                     },
                     SchoolYear = d.RokSzkolny,
+                    Institution = d.PlacowkaOswiatowa,
                     Difficulty = new DifficultyViewModel
                     {
                         Id = d.DiagnozaSkalaTrudnosci.Id,
@@ -1091,6 +1086,10 @@ namespace Quiz.Infrastructure.Services
         public async Task<DiagnosisViewModel> AddDiagnosis(
             CreateDiagnosisDto createDiagnosis)
         {
+            if (string.IsNullOrEmpty(createDiagnosis.Institution))
+                throw new DataValidationException(
+                    "Należy podać pełną nazwę placówki oświatowej");
+
             if (!_dbContext.Pracownicy
                 .Any(p => p.Id == createDiagnosis.EmployeeId))
                 throw new DataValidationException(
@@ -1121,6 +1120,7 @@ namespace Quiz.Infrastructure.Services
                 UczenId = createDiagnosis.StudentId,
                 RokSzkolny = createDiagnosis.SchoolYear,
                 SkalaTrudnosciId = createDiagnosis.DifficultyId,
+                PlacowkaOswiatowa = createDiagnosis.Institution,
                 CzyAktywny = true
             };
 

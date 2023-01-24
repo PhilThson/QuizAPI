@@ -31,14 +31,15 @@ namespace Quiz.Data.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime DataPrzeprowadzenia { get; set; }
 
+        [Required]
+        [StringLength(512)]
+        public string PlacowkaOswiatowa { get; set; }
+
         public byte SkalaTrudnosciId { get; set; }
 
         [ForeignKey(nameof(SkalaTrudnosciId))]
         [InverseProperty("SkalaTrudnosciDiagnozy")]
         public virtual SkalaTrudnosci DiagnozaSkalaTrudnosci { get; set; }
-
-        //Składany z opisów?
-        //public string RozwojEmocjonalnoSpoleczny { get; set; }
 
         [JsonIgnore]
         public virtual ICollection<Wynik> DiagnozaWyniki { get; set; }
