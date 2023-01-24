@@ -1,13 +1,18 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Quiz.Shared.ViewModels
 {
 	public class DiagnosisToPdfViewModel
 	{
         public int Id { get; set; }
+        [DisplayName("Nazwa placówki oświatowej:")]
+        public string Institution { get; set; }
         [DisplayName("Rok szkolny:")]
         public string SchoolYear { get; set; }
+        [DisplayName("PPP:")]
+        public string CounselingCenter { get; set; }
         [DisplayName("Uczeń:")]
         public StudentViewModel Student { get; set; }
         [DisplayName("Prowadzący:")]

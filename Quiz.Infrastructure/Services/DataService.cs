@@ -1181,11 +1181,12 @@ namespace Quiz.Infrastructure.Services
             return new DiagnosisToPdfViewModel
             {
                 Id = diagnosis.Id,
+                Institution = diagnosis.Institution,
+                SchoolYear = diagnosis.SchoolYear,
                 Student = diagnosis.Student,
                 Employee = diagnosis.Employee,
                 CreatedDate = diagnosis.CreatedDate,
                 Difficulty = diagnosis.Difficulty,
-                SchoolYear = diagnosis.SchoolYear,
                 Results = diagnosis.Results,
                 QuestionsSetsMastered =
                     questionsSets.Where(qs => masteredQSIds.Contains(qs.Id))

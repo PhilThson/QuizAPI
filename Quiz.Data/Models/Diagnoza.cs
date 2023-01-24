@@ -35,12 +35,16 @@ namespace Quiz.Data.Models
         [StringLength(512)]
         public string PlacowkaOswiatowa { get; set; }
 
+        [Required]
+        [StringLength(512)]
+        public string PoradniaPsychologiczna { get; set; }
+
         public byte SkalaTrudnosciId { get; set; }
 
         [ForeignKey(nameof(SkalaTrudnosciId))]
         [InverseProperty("SkalaTrudnosciDiagnozy")]
         public virtual SkalaTrudnosci DiagnozaSkalaTrudnosci { get; set; }
-
+        
         [JsonIgnore]
         public virtual ICollection<Wynik> DiagnozaWyniki { get; set; }
 
