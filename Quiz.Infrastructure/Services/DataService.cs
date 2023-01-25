@@ -1003,6 +1003,7 @@ namespace Quiz.Infrastructure.Services
                 },
                 SchoolYear = d.RokSzkolny,
                 Institution = d.PlacowkaOswiatowa,
+                CounselingCenter = d.PoradniaPsychologiczna,
                 Difficulty = new DifficultyViewModel
                 {
                     Id = d.DiagnozaSkalaTrudnosci.Id,
@@ -1054,6 +1055,7 @@ namespace Quiz.Infrastructure.Services
                     },
                     SchoolYear = d.RokSzkolny,
                     Institution = d.PlacowkaOswiatowa,
+                    CounselingCenter = d.PoradniaPsychologiczna,
                     Difficulty = new DifficultyViewModel
                     {
                         Id = d.DiagnozaSkalaTrudnosci.Id,
@@ -1090,6 +1092,10 @@ namespace Quiz.Infrastructure.Services
                 throw new DataValidationException(
                     "Należy podać pełną nazwę placówki oświatowej");
 
+            if (string.IsNullOrEmpty(createDiagnosis.CounselingCenter))
+                throw new DataValidationException(
+                    "Należy podać pełną nazwę PPP");
+
             if (!_dbContext.Pracownicy
                 .Any(p => p.Id == createDiagnosis.EmployeeId))
                 throw new DataValidationException(
@@ -1114,15 +1120,7 @@ namespace Quiz.Infrastructure.Services
                 throw new DataValidationException("Uczeń już posiada diagnozę" +
                     "za dany rok");
 
-            var diagnosis = new Diagnoza
-            {
-                PracownikId = createDiagnosis.EmployeeId,
-                UczenId = createDiagnosis.StudentId,
-                RokSzkolny = createDiagnosis.SchoolYear,
-                SkalaTrudnosciId = createDiagnosis.DifficultyId,
-                PlacowkaOswiatowa = createDiagnosis.Institution,
-                CzyAktywny = true
-            };
+            var diagnosis = (Diagnoza)createDiagnosis;
 
             await _dbContext.Diagnozy.AddAsync(diagnosis);
             await _dbContext.SaveChangesAsync();
@@ -1178,23 +1176,16 @@ namespace Quiz.Infrastructure.Services
             var toImproveQSIds = diagnosis.Results.Where(d => d.RatingLevel < 5)
                 .Select(r => r.QuestionsSetRating.QuestionsSetId).ToList();
 
-            return new DiagnosisToPdfViewModel
-            {
-                Id = diagnosis.Id,
-                Institution = diagnosis.Institution,
-                SchoolYear = diagnosis.SchoolYear,
-                Student = diagnosis.Student,
-                Employee = diagnosis.Employee,
-                CreatedDate = diagnosis.CreatedDate,
-                Difficulty = diagnosis.Difficulty,
-                Results = diagnosis.Results,
-                QuestionsSetsMastered =
+            var diagnosisToPdf = (DiagnosisToPdfViewModel)diagnosis;
+
+            diagnosisToPdf.QuestionsSetsMastered =
                     questionsSets.Where(qs => masteredQSIds.Contains(qs.Id))
-                    .OrderBy(qs => qs.Area.Name).ToList(),
-                QuestionsSetsToImprove =
+                    .OrderBy(qs => qs.Area.Name).ToList();
+            diagnosisToPdf.QuestionsSetsToImprove =
                     questionsSets.Where(qs => toImproveQSIds.Contains(qs.Id))
-                    .OrderBy(qs => qs.Area.Name).ToList(),
-            };
+                    .OrderBy(qs => qs.Area.Name).ToList();
+
+            return diagnosisToPdf;
         }
         #endregion
 
@@ -1241,14 +1232,7 @@ namespace Quiz.Infrastructure.Services
             //    throw new DataValidationException("Istnieje już " +
             //        "wynik dla podanego zastawu pytań");
 
-            var result = new Wynik
-            {
-                DiagnozaId = createResult.DiagnosisId,
-                OcenaZestawuPytanId = createResult.RatingId,
-                PoziomOceny = createResult.RatingLevel,
-                Notatki = createResult.Notes,
-                CzyAktywny = true
-            };
+            var result = (Wynik)createResult;
 
             await _dbContext.Wyniki.AddAsync(result);
             await _dbContext.SaveChangesAsync();

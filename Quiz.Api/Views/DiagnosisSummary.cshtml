@@ -83,12 +83,14 @@
             </tr>
             <tr class="top">
                 <td style="white-space: nowrap;">
+                    Placówka oświatowa:<br>
                     Diagnoza za rok szkolny:<br>
                     Imię i nazwisko wykonującego badanie:<br>
                     Skala trudności:<br>
                     Data wykonania badania:
                 </td>
                 <td colspan="2" style="font-style:italic">
+                    @Model.Institution<br>
                     @Model.SchoolYear<br>
                     @Model.Employee.FirstName @Model.Employee.LastName<br>
                     @Model.Difficulty.Description<br>
@@ -113,7 +115,7 @@
 
             <tr class="information">
                 <td colspan="3">
-                    Dziecko przyjęte do szkoły SP nr 16 w Zielonej górze na podstawie                     orzeczenia nr @Model.Student.DisabilityCert                     o potrzebie kształcenia specjalnego wydanego przez:                     <em>@Model.CounselingCenter</em>                      z niepełnosprawnością intelektualną w stopniu lekkim <br>
+                    Dziecko przyjęte do placówki <em>@Model.Institution</em> na podstawie                     orzeczenia nr <em>@Model.Student.DisabilityCert</em>                     o potrzebie kształcenia specjalnego wydanego przez:                     <em>@Model.CounselingCenter</em>                      z niepełnosprawnością intelektualną w stopniu lekkim <br>
                 </td>
             </tr>
 

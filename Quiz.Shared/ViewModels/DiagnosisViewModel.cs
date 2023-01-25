@@ -14,5 +14,21 @@ namespace Quiz.Shared.ViewModels
         public DifficultyViewModel Difficulty { get; set; }
         public DateTime CreatedDate { get; set; }
         public int? ReportId { get; set; }
+
+        public static explicit operator DiagnosisToPdfViewModel(DiagnosisViewModel diagnosis) =>
+            new DiagnosisToPdfViewModel
+            {
+                Id = diagnosis.Id,
+                Institution = diagnosis.Institution,
+                SchoolYear = diagnosis.SchoolYear,
+                CounselingCenter = diagnosis.CounselingCenter,
+                Student = diagnosis.Student,
+                Employee = diagnosis.Employee,
+                CreatedDate = diagnosis.CreatedDate,
+                Difficulty = diagnosis.Difficulty,
+                Results = diagnosis.Results,
+                QuestionsSetsMastered = new List<QuestionsSetViewModel>(),
+                QuestionsSetsToImprove = new List<QuestionsSetViewModel>()
+            };
     }
 }
