@@ -36,6 +36,7 @@ namespace Quiz.Infrastructure.Interfaces
             byte difficultyId);
         Task<QuestionsSetViewModel> AddQuestionsSet(
             CreateQuestionsSetDto createQuestionsSet);
+        Task DeleteQuestionsSetById(int id);
 
         Task<IEnumerable<QuestionViewModel>> GetAllQuestions();
         Task<QuestionViewModel> GetQuestionById(int id);

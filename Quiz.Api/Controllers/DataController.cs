@@ -272,32 +272,17 @@ namespace Quiz.Api.Controllers
             try
             {
                 if (!difficultyId.HasValue)
-                    return Ok(await _dataService.GetQuestionsSetsByCondition());
+                    return Ok(await _dataService.GetQuestionsSetsByCondition(zp => zp.CzyAktywny));
                 else
                 {
                     var difficulty =
                         await _dataService.GetDifficultyById(difficultyId.Value);
 
-                    //var questionSets = await _dataService.GetAllQuestionsSets();
-
-                    //należy pobrać takie zestawy pytań, które w swojej skali trudności
-                    //zawierają skalę podaną w parametrze
-                    //np.: dla skali AC, powinno znaleźć zestawy pytań o skalach:
-                    // A lub C lub AC lub AB lub BC lub ABC
-                    //dla skali B, powinno zwrócić zestawy pytań o skalach:
-                    // B, AB, BC oraz ABC
-                    //tak samo dla skali ABC, powinno zwrócić wszystkie zestawy pytań
-                    //var questionsSetsToGet =
-                    //    questionSets.SelectMany(d => d.Difficulty.Name, (qs, c) =>
-                    //        new { QuestionsSet = qs, DifficultyLetter = c })
-                    //    .Where(a => difficulty.Name.Contains(a.DifficultyLetter))
-                    //    .Select(a => a.QuestionsSet)
-                    //    .Distinct();
-
-                    //wersja prostsza, czyli np.:
+                    //wersja aktualna, czyli np.:
                     //dla skali BC zwróci B, C oraz BC
                     var questionsSets = await _dataService.GetQuestionsSetsByCondition(
-                        zp => difficulty.Name.Contains(zp.SkalaTrudnosci.Nazwa));
+                        zp => difficulty.Name.Contains(zp.SkalaTrudnosci.Nazwa) &&
+                        zp.CzyAktywny);
 
                     return Ok(questionsSets);
                 }
@@ -313,6 +298,8 @@ namespace Quiz.Api.Controllers
             try
             {
                 var listOfIds = askedQuestionSetsIds?.Split(',')?.Select(Int32.Parse)?.ToList();
+                //Tutaj nie ma filtrowania aktywnych zestawów pytań, ponieważ musi być edycja
+                //i podgląd ZP wchodzących w skład istniejąych diagnoz
                 var questionsSets = await _dataService.GetQuestionsSetsByCondition(
                     zp => listOfIds.Contains(zp.Id));
                 return Ok(questionsSets);
@@ -393,6 +380,18 @@ namespace Quiz.Api.Controllers
                 return Ok(updated);
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
+        }
+
+        [HttpDelete("zestawyPytan/{id}")]
+        public async Task<IActionResult> DeleteQuestionsSetById(int id)
+        {
+            try
+            {
+                await _dataService.DeleteQuestionsSetById(id);
+                return NoContent();
+            }
+            catch (DataNotFoundException e) { return BadRequest(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion

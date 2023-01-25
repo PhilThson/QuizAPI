@@ -13,7 +13,7 @@ namespace Quiz.Data.EntityConfiguration
                 .WithMany(z => z.ZestawPytanPytania)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasQueryFilter(p => p.CzyAktywny);
+            //builder.HasQueryFilter(p => p.CzyAktywny);
         }
     }
 }

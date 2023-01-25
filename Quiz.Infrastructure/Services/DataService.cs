@@ -544,45 +544,30 @@ namespace Quiz.Infrastructure.Services
                 SkalaTrudnosciId = createQuestionsSet.DifficultyId,
                 CzyAktywny = true
             };
-            await _dbContext.AddAsync(questionsSet);
-            await _dbContext.SaveChangesAsync();
 
             if (createQuestionsSet.QuestionsSetRatings.Count() > 0)
-            {
-                var questionsSetRatings = new List<OcenaZestawuPytan>();
                 foreach (var rating in createQuestionsSet.QuestionsSetRatings)
-                {
-                    questionsSetRatings.Add(new OcenaZestawuPytan
+                    questionsSet.ZestawPytanOceny.Add(new OcenaZestawuPytan
                     {
                         OpisOceny = rating,
-                        ZestawPytanId = questionsSet.Id,
                         CzyAktywny = true
                     });
-                }
-                await _dbContext.AddRangeAsync(questionsSetRatings);
-                await _dbContext.SaveChangesAsync();
-            }
 
-            if (createQuestionsSet.Questions?.Count() > 0)
-            {
-                var questions = new List<Pytanie>();
-                foreach (var question in createQuestionsSet.Questions)
-                    questions.Add(new Pytanie
-                    {
-                        Tresc = question.Content,
-                        Opis = question.Description,
-                        ZestawPytanId = questionsSet.Id,
-                        CzyAktywny = true
-                    });
-                await _dbContext.Pytania.AddRangeAsync(questions);
-                await _dbContext.SaveChangesAsync();
-            }
+            //Obecnie nie ma możliwości dodania pytania podczas tworzenia zestawu pytań
+            //if (createQuestionsSet.Questions?.Count() > 0)
+            //{
+            //    foreach (var question in createQuestionsSet.Questions)
+            //        questionsSet.ZestawPytanPytania.Add(new Pytanie
+            //        {
+            //            Tresc = question.Content,
+            //            Opis = question.Description,
+            //            CzyAktywny = true
+            //        });
+            //}
 
             if (createQuestionsSet.AttachmentFiles?.Count() > 0)
-            {
-                var attFiles = new List<KartaPracy>();
                 foreach (var attFile in createQuestionsSet.AttachmentFiles)
-                    attFiles.Add(new KartaPracy
+                    questionsSet.ZestawPytanKartyPracy.Add(new KartaPracy
                     {
                         Nazwa = attFile.Name,
                         Opis = attFile.Description,
@@ -592,9 +577,10 @@ namespace Quiz.Infrastructure.Services
                         ZestawPytanId = questionsSet.Id,
                         CzyAktywny = true
                     });
-                await _dbContext.KartyPracy.AddRangeAsync(attFiles);
-                await _dbContext.SaveChangesAsync();
-            }
+
+
+            await _dbContext.AddAsync(questionsSet);
+            await _dbContext.SaveChangesAsync();
 
             return await GetQuestionsSetById(questionsSet.Id);
         }
@@ -635,6 +621,29 @@ namespace Quiz.Infrastructure.Services
             await _dbContext.SaveChangesAsync();
             return await GetDifficultyById(difficultyId);
         }
+
+        public async Task DeleteQuestionsSetById(int id)
+        {
+            var questionsSet = await _dbContext.ZestawyPytan
+                .Include(zp => zp.ZestawPytanPytania)
+                .Include(zp => zp.ZestawPytanOceny)
+                .Include(zp => zp.ZestawPytanKartyPracy)
+                .FirstOrDefaultAsync(zp => zp.Id == id && zp.CzyAktywny) ??
+                throw new DataNotFoundException(
+                    "Nie znaleziono zestawu pytań o podanym identyfikatorze");
+
+            foreach (var question in questionsSet.ZestawPytanPytania)
+                question.CzyAktywny = false;
+
+            foreach (var rating in questionsSet.ZestawPytanOceny)
+                rating.CzyAktywny = false;
+
+            foreach (var attachment in questionsSet.ZestawPytanKartyPracy)
+                attachment.CzyAktywny = false;
+
+            questionsSet.CzyAktywny = false;
+            await _dbContext.SaveChangesAsync();
+        }
         #endregion
 
         #region Attachments
@@ -650,13 +659,15 @@ namespace Quiz.Infrastructure.Services
                 ContentType = k.RodzajZawartosci,
                 Size = k.Rozmiar
             })
-            .FirstOrDefaultAsync()
-            ?? throw new DataNotFoundException();
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException(
+                $"Nie znaleziono karty pracy o podanym identyfikatorze ({id})");
         #endregion
 
         #region Questions
         public async Task<IEnumerable<QuestionViewModel>> GetAllQuestions() =>
             await _dbContext.Pytania
+            .Where(p => p.CzyAktywny)
             .Select(p => new QuestionViewModel
             {
                 Id = p.Id,
@@ -676,8 +687,9 @@ namespace Quiz.Infrastructure.Services
                 Description = p.Opis,
                 QuestionsSetId = p.ZestawPytanId
             })
-            .FirstOrDefaultAsync()
-            ?? throw new DataNotFoundException();
+            .FirstOrDefaultAsync() ??
+            throw new DataNotFoundException(
+                $"Nie znaleziono pytania o podanym identyfikatorze ({id})");
 
         public async Task<QuestionViewModel> AddQuestion(QuestionViewModel questionVM)
         {
@@ -756,6 +768,7 @@ namespace Quiz.Infrastructure.Services
         #region Areas
         public async Task<IEnumerable<AreaViewModel>> GetAllAreas() =>
             await _dbContext.ObszaryZestawowPytan
+            .Where(o => o.CzyAktywny)
             .Select(o => new AreaViewModel
             {
                 Id = o.Id,
@@ -840,6 +853,7 @@ namespace Quiz.Infrastructure.Services
         #region Difficulties
         public async Task<IEnumerable<DifficultyViewModel>> GetAllDifficulties() =>
             await _dbContext.SkaleTrudnosci
+            .Where(s => s.CzyAktywny)
             .Select(s => new DifficultyViewModel
             {
                 Id = s.Id,
@@ -1010,7 +1024,7 @@ namespace Quiz.Infrastructure.Services
                     Name = d.DiagnozaSkalaTrudnosci.Nazwa,
                     Description = d.DiagnozaSkalaTrudnosci.Opis
                 },
-                //Nie są zwracane rezultaty diagnozy na liście wszystkich diagnóz
+                //Nie są zwracane rezultaty diagnozy na liście wszystkich diagnoz
                 CreatedDate = d.DataPrzeprowadzenia,
                 ReportId = d.DiagnozaRaport.Id
             })
@@ -1079,7 +1093,7 @@ namespace Quiz.Infrastructure.Services
                         })
                     ),
                     CreatedDate = d.DataPrzeprowadzenia,
-                    ReportId = d.DiagnozaRaport.Id
+                    ReportId = d.DiagnozaRaport.Id,
                 })
                 .FirstOrDefaultAsync() ??
                 throw new DataNotFoundException("Nie znaleziono diagnozy o podanym " +
@@ -1226,6 +1240,7 @@ namespace Quiz.Infrastructure.Services
                 throw new DataValidationException("Przekroczono zakres poziomu oceny " +
                     "zestawu pytań");
 
+            //Obecnie można edytować istniejący wynik
             //if (_dbContext.Wyniki
             //    .Any(w => w.DiagnozaId == createResult.DiagnosisId &&
             //        w.OcenaZestawuPytanId == createResult.RatingId))

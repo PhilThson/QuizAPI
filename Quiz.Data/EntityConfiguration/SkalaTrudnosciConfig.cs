@@ -9,7 +9,7 @@ namespace Quiz.Data.EntityConfiguration
 	{
         public void Configure(EntityTypeBuilder<SkalaTrudnosci> builder)
         {
-            builder.HasQueryFilter(u => u.CzyAktywny);
+            //builder.HasQueryFilter(u => u.CzyAktywny);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Quiz.Data.EntityConfiguration
     {
         public void Configure(EntityTypeBuilder<ObszarZestawuPytan> builder)
         {
-            builder.HasQueryFilter(u => u.CzyAktywny);
+            //builder.HasQueryFilter(u => u.CzyAktywny);
         }
     }
 }
