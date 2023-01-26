@@ -18,16 +18,16 @@ namespace Quiz.Infrastructure.Services
     {
         #region Private fields
         private readonly QuizDbContext _dbContext;
-        //private readonly IDocumentService _documentService;
+        private readonly IDocumentService _documentService;
         #endregion
 
         #region Constructor
         public DataService(QuizDbContext dbContext
-            //, IDocumentService documentService
+            , IDocumentService documentService
             )
         {
             _dbContext = dbContext;
-            //_documentService = documentService;
+            _documentService = documentService;
         }
         #endregion
 
