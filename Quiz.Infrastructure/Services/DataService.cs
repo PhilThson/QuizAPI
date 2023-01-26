@@ -1150,8 +1150,8 @@ namespace Quiz.Infrastructure.Services
             var diagnosisToPdf = await GetDiagnosisToPdfViewModel(diagnosis);
             //Zamockowanie do developersko na macOS'ie:
             //zakomentować + dodać pustą tablicę bajtów i rozmiar
-            //var pdfDocument = _documentService
-            //    .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
+            var pdfDocument = _documentService
+                .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
 
             var report = new Raport
             {
@@ -1159,10 +1159,10 @@ namespace Quiz.Infrastructure.Services
                     $"{diagnosisToPdf.Employee.LastName}_" +
                     $"{diagnosisToPdf.Student.LastName}_" +
                     $"{diagnosisToPdf.SchoolYear}.pdf",
-                //Zawartosc = pdfDocument,
-                Zawartosc = new byte[100],
-                //Rozmiar = pdfDocument.Length,
-                Rozmiar = 100,
+                Zawartosc = pdfDocument,
+                //Zawartosc = new byte[100],
+                Rozmiar = pdfDocument.Length,
+                //Rozmiar = 100,
                 DiagnozaId = diagnosis.Id,
                 CzyAktywny = true
             };
