@@ -159,8 +159,8 @@ namespace Quiz.Api.Controllers
                 var address = await _dataService.GetAddressById(id);
                 return Ok(address);
             }
-            catch(DataNotFoundException e) { return NotFound(e.Message); }
-            catch(Exception e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpPost("adresy")]
@@ -218,7 +218,7 @@ namespace Quiz.Api.Controllers
                 var question = await _dataService.GetQuestionById(id);
                 return Ok(question);
             }
-            catch(DataNotFoundException e) { return NotFound(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
         }
 
         [HttpPost("pytania")]
@@ -232,7 +232,7 @@ namespace Quiz.Api.Controllers
                 var question = await _dataService.AddQuestion(questionVM);
 
                 return CreatedAtAction(nameof(GetQuestionById),
-                    new { id = question.Id}, question);
+                    new { id = question.Id }, question);
             }
             catch (DataValidationException e) { return BadRequest(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
@@ -267,43 +267,38 @@ namespace Quiz.Api.Controllers
 
         #region Zestawy pytań
         [HttpGet("zestawyPytan")]
-        public async Task<IActionResult> GetAllQuestionsSets([FromQuery] byte? difficultyId)
+        public async Task<IActionResult> GetAllQuestionsSets([FromQuery] byte? difficultyId,
+            [FromQuery] string? askedQuestionSetsIds)
         {
             try
             {
-                if (!difficultyId.HasValue)
-                    return Ok(await _dataService.GetQuestionsSetsByCondition(zp => zp.CzyAktywny));
-                else
+                if (difficultyId.HasValue)
                 {
-                    var difficulty =
-                        await _dataService.GetDifficultyById(difficultyId.Value);
+                    var difficulty = await _dataService.GetDifficultyById(difficultyId.Value);
 
                     //wersja aktualna, czyli np.:
                     //dla skali BC zwróci B, C oraz BC
                     var questionsSets = await _dataService.GetQuestionsSetsByCondition(
                         zp => difficulty.Name.Contains(zp.SkalaTrudnosci.Nazwa) &&
-                        zp.CzyAktywny);
+                            zp.CzyAktywny);
 
                     return Ok(questionsSets);
                 }
+
+                if (!string.IsNullOrEmpty(askedQuestionSetsIds))
+                {
+                    var listOfIds = askedQuestionSetsIds?.Split(',')?.Select(Int32.Parse)?.ToList();
+                    //Tutaj nie ma filtrowania aktywnych zestawów pytań, ponieważ musi być edycja
+                    //i podgląd ZP wchodzących w skład istniejąych diagnoz
+                    var questionsSets = await _dataService.GetQuestionsSetsByCondition(
+                        zp => listOfIds.Contains(zp.Id));
+
+                    return Ok(questionsSets);
+                }
+
+                return Ok(await _dataService.GetQuestionsSetsByCondition(zp => zp.CzyAktywny));
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
-        }
-
-        [HttpGet("zestawyPytan/zadane")]
-        public async Task<IActionResult> GetQuestionsSetsByIds(
-            [FromQuery] string askedQuestionSetsIds)
-        {
-            try
-            {
-                var listOfIds = askedQuestionSetsIds?.Split(',')?.Select(Int32.Parse)?.ToList();
-                //Tutaj nie ma filtrowania aktywnych zestawów pytań, ponieważ musi być edycja
-                //i podgląd ZP wchodzących w skład istniejąych diagnoz
-                var questionsSets = await _dataService.GetQuestionsSetsByCondition(
-                    zp => listOfIds.Contains(zp.Id));
-                return Ok(questionsSets);
-            }
             catch (Exception e) { return BadRequest(e.Message); }
         }
 
@@ -334,52 +329,58 @@ namespace Quiz.Api.Controllers
             catch (Exception e) { return BadRequest(e.Message); }
         }
 
-        [HttpPatch("zestawyPytan/{id}/skill")]
-        public async Task<IActionResult> UpdateSkill([FromRoute] int id,
-            [FromQuery] string skill)
+        [HttpPatch("zestawyPytan/{id}")]
+        public async Task<IActionResult> UpdateQuestionsSetProperty([FromRoute] int id,
+            [FromBody] KeyValuePair<string, string> propertyValue)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(skill) || skill.Length > 2048)
-                    return BadRequest("Przesłano nieprawidłowy model");
+                if (string.IsNullOrEmpty(propertyValue.Key))
+                    throw new DataValidationException(
+                        "Przesłany model nie zawiera wartości do aktualizacji");
 
-                var updated = await _dataService.UpdateSkillDescription(id, skill);
-                return Ok(updated);
+                switch (propertyValue.Key)
+                {
+                    case "skill":
+                        if (propertyValue.Value.Length > 2048)
+                            throw new DataValidationException(
+                                "Przesłano opis umiejętności musi mieć poniżej 2048 znaków");
+
+                        var updated =
+                            await _dataService.UpdateSkillDescription(id, propertyValue.Value);
+                        return Ok(updated);
+
+                    case "area":
+                        if (!byte.TryParse(propertyValue.Value, out byte areaId))
+                            throw new DataValidationException(
+                                "Przesłano nieprawidłowy identyfikator obszaru");
+
+                        if (areaId == default(byte))
+                            throw new DataNotFoundException();
+
+                        var updatedArea = await _dataService.UpdateQuestionsSetArea(id, areaId);
+
+                        return Ok(updatedArea);
+
+                    case "difficulty":
+                        if (!byte.TryParse(propertyValue.Value, out byte difficultyId))
+                            throw new DataValidationException(
+                                "Przesłano nieprawidłowy identyfikator skali trudności");
+
+                        if (difficultyId == default(byte))
+                            throw new DataNotFoundException();
+
+                        var updatedDifficulty =
+                            await _dataService.UpdateQuestionsSetDifficulty(id, difficultyId);
+
+                        return Ok(updatedDifficulty);
+
+                    default:
+                        return BadRequest("Nie znaleziono właściwości do aktualizacji");
+                }
             }
             catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
-        }
-
-        [HttpPatch("zestawyPytan/{id}/area")]
-        public async Task<IActionResult> UpdateQuestionsSetArea([FromRoute] int id,
-            [FromQuery] byte areaId)
-        {
-            try
-            {
-                if (areaId == default(byte))
-                    return BadRequest("Przesłano nieprawidłowy model");
-
-                var updated = await _dataService.UpdateQuestionsSetArea(id, areaId);
-                return Ok(updated);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
-        }
-
-        [HttpPatch("zestawyPytan/{id}/difficulty")]
-        public async Task<IActionResult> UpdateQuestionsSetDifficulty(
-            [FromRoute] int id, [FromQuery] byte difficultyId)
-        {
-            try
-            {
-                if (difficultyId == default(byte))
-                    return BadRequest("Przesłano nieprawidłowy model");
-
-                var updated = await _dataService.UpdateQuestionsSetDifficulty(id,
-                    difficultyId);
-                return Ok(updated);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (DataValidationException e) { return BadRequest(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
 
@@ -554,8 +555,8 @@ namespace Quiz.Api.Controllers
                     await _dataService.GetRatingsByQuestionsSetId(questionsSetId);
                 return Ok(ratings);
             }
-            catch(DataNotFoundException e) { return NotFound(e.Message); }
-            catch(Exception e) { return BadRequest(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion
 
@@ -568,7 +569,7 @@ namespace Quiz.Api.Controllers
                 var attachment = await _dataService.GetAttachmentById(id);
                 return Ok(attachment);
             }
-            catch (DataNotFoundException e){ return NotFound(e.Message); }
+            catch (DataNotFoundException e) { return NotFound(e.Message); }
             catch (Exception e) { return BadRequest(e.Message); }
         }
         #endregion

@@ -25,6 +25,7 @@ namespace Quiz.Infrastructure.Services
             return GeneratePdf(htmlContent);
         }
 
+        //Przykład generowania pdf z ciągu znaków z formatowaniem html
         public byte[] GeneratePdfFromString()
         {
             var htmlContent = $@"
