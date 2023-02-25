@@ -1084,7 +1084,7 @@ namespace Quiz.Infrastructure.Services
                             Id = w.Id,
                             Notes = w.Notatki,
                             RatingLevel = w.PoziomOceny,
-                            QuestionsSetRating = new RatingViewModel
+                            QuestionsSetRating = new RatingDto
                             {
                                 Id = w.OcenaZestawuPytan.Id,
                                 RatingDescription = w.OcenaZestawuPytan.OpisOceny,
@@ -1210,7 +1210,7 @@ namespace Quiz.Infrastructure.Services
             .Select(w => new ResultViewModel
             {
                 Id = w.Id,
-                QuestionsSetRating = new RatingViewModel
+                QuestionsSetRating = new RatingDto
                 {
                     Id = w.OcenaZestawuPytanId,
                     QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId,
@@ -1241,15 +1241,16 @@ namespace Quiz.Infrastructure.Services
                     "zestawu pytań");
 
             //Obecnie można edytować istniejący wynik
-            //if (_dbContext.Wyniki
-            //    .Any(w => w.DiagnozaId == createResult.DiagnosisId &&
-            //        w.OcenaZestawuPytanId == createResult.RatingId))
-            //    throw new DataValidationException("Istnieje już " +
-            //        "wynik dla podanego zastawu pytań");
 
-            var result = (Wynik)createResult;
+            var result = await _dbContext.Wyniki
+                .FirstOrDefaultAsync(r => r.Id == createResult.Id) ??
+                new Wynik();
 
-            await _dbContext.Wyniki.AddAsync(result);
+            result.FillResultModel(createResult);
+
+            if (result.Id == default)
+                await _dbContext.Wyniki.AddAsync(result);
+
             await _dbContext.SaveChangesAsync();
 
             return await GetResultById(result.Id);
@@ -1260,11 +1261,11 @@ namespace Quiz.Infrastructure.Services
             int diagnosisId, int questionsSetId) =>
             await _dbContext.Wyniki
             .Where(w => w.DiagnozaId == diagnosisId &&
-                w.OcenaZestawuPytan.ZestawPytanId == questionsSetId)
+                    w.OcenaZestawuPytan.ZestawPytanId == questionsSetId)
             .Select(w => new ResultViewModel
             {
                 Id = w.Id,
-                QuestionsSetRating = new RatingViewModel
+                QuestionsSetRating = new RatingDto
                 {
                     Id = w.OcenaZestawuPytan.Id,
                     QuestionsSetId = w.OcenaZestawuPytan.ZestawPytanId,

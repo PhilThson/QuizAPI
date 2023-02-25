@@ -47,6 +47,14 @@ namespace Quiz.Infrastructure.Helpers
             a.NumerMieszkania = addressDto.FlatNumber;
             a.KodPocztowy = addressDto.PostalCode;
         }
+
+        public static void FillResultModel(this Wynik w, CreateResultDto createResult)
+        {
+            w.DiagnozaId = createResult.DiagnosisId;
+            w.OcenaZestawuPytanId = createResult.RatingId;
+            w.PoziomOceny = createResult.RatingLevel;
+            w.Notatki = createResult.Notes;
+        }
     }
 }
 
