@@ -18,16 +18,16 @@ namespace Quiz.Infrastructure.Services
     {
         #region Private fields
         private readonly QuizDbContext _dbContext;
-        private readonly IDocumentService _documentService;
+        //private readonly IDocumentService _documentService;
         #endregion
 
         #region Constructor
         public DataService(QuizDbContext dbContext
-            , IDocumentService documentService
+            //, IDocumentService documentService
             )
         {
             _dbContext = dbContext;
-            _documentService = documentService;
+            //_documentService = documentService;
         }
         #endregion
 
@@ -879,7 +879,7 @@ namespace Quiz.Infrastructure.Services
             var existingDifficulty = await _dbContext.SkaleTrudnosci
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(d => d.Nazwa == createDto.Name
-                                && d.Opis == createDto.Description);
+                                        && d.Opis == createDto.Description);
 
             if (existingDifficulty != null)
             {
@@ -1150,8 +1150,8 @@ namespace Quiz.Infrastructure.Services
             var diagnosisToPdf = await GetDiagnosisToPdfViewModel(diagnosis);
             //Zamockowanie do developersko na macOS'ie:
             //zakomentować + dodać pustą tablicę bajtów i rozmiar
-            var pdfDocument = _documentService
-                .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
+            //var pdfDocument = _documentService
+            //    .GeneratePdfFromRazorView("/Views/DiagnosisSummary.cshtml", diagnosisToPdf);
 
             var report = new Raport
             {
@@ -1159,10 +1159,10 @@ namespace Quiz.Infrastructure.Services
                     $"{diagnosisToPdf.Employee.LastName}_" +
                     $"{diagnosisToPdf.Student.LastName}_" +
                     $"{diagnosisToPdf.SchoolYear}.pdf",
-                Zawartosc = pdfDocument,
-                //Zawartosc = new byte[100],
-                Rozmiar = pdfDocument.Length,
-                //Rozmiar = 100,
+                //Zawartosc = pdfDocument,
+                Zawartosc = new byte[100],
+                //Rozmiar = pdfDocument.Length,
+                Rozmiar = 100,
                 DiagnozaId = diagnosis.Id,
                 CzyAktywny = true
             };
@@ -1438,7 +1438,7 @@ namespace Quiz.Infrastructure.Services
 
         private void ValidatePersonalNumber(string personalNumber)
         {
-            if (!(personalNumber.Length == 11 && Regex.IsMatch(personalNumber, @"^\d+$")))
+            if (!Regex.IsMatch(personalNumber, @"^\d{11}$"))
                 throw new DataValidationException("Wprowadzono nieprawidłowy numer PESEL");
         }
         #endregion
