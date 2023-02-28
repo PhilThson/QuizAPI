@@ -23,6 +23,8 @@
     <PackageReference Include="Bogus" Version="34.0.2" />
     <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.14" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,19 +35,29 @@
     <None Remove="libwkhtmltox.dll" />
     <None Remove="libwkhtmltox.dylib" />
     <None Remove="libwkhtmltox.so" />
+    <None Remove="CustomMiddleware\" />
+    <None Remove="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quiz.Data\Quiz.Data.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+      <Targets></Targets>
+      <OutputItemType></OutputItemType>
+      <ReferenceSourceTarget>ProjectReference</ReferenceSourceTarget>
     </ProjectReference>
     <ProjectReference Include="..\Quiz.Infrastructure\Quiz.Infrastructure.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+      <Targets></Targets>
+      <OutputItemType></OutputItemType>
+      <ReferenceSourceTarget>ProjectReference</ReferenceSourceTarget>
     </ProjectReference>
   </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Views\" />
       <Folder Include="Utilities\" />
+      <Folder Include="CustomMiddleware\" />
+      <Folder Include="Extensions\" />
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Include="libwkhtmltox.dll">

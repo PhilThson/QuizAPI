@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure;
@@ -8,6 +9,7 @@ using Quiz.Shared.ViewModels;
 
 namespace Quiz.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class DataController : ControllerBase
@@ -34,52 +36,30 @@ namespace Quiz.Api.Controllers
         [HttpGet("pracownicy/{id}")]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
-            try
-            {
-                var result = await _dataService.GetEmployeeById(id);
-                return Ok(result);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var result = await _dataService.GetEmployeeById(id);
+            return Ok(result);
         }
 
         [HttpPost("pracownicy")]
         public async Task<IActionResult> AddEmployee(CreateEmployeeDto employeeDto)
         {
-            try
-            {
-                var createdEmployee = await _dataService.AddEmployee(employeeDto);
-                return CreatedAtAction(nameof(GetEmployeeById),
-                    new { id = createdEmployee.Id }, createdEmployee);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var createdEmployee = await _dataService.AddEmployee(employeeDto);
+            return CreatedAtAction(nameof(GetEmployeeById),
+                new { id = createdEmployee.Id }, createdEmployee);
         }
 
         [HttpDelete("pracownicy/{id}")]
         public async Task<IActionResult> DeleteEmployeeById(int id)
         {
-            try
-            {
-                await _dataService.DeleteEmployeeById(id);
-                return NoContent();
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            await _dataService.DeleteEmployeeById(id);
+            return NoContent();
         }
 
         [HttpPut("pracownicy")]
         public async Task<IActionResult> UpdateEmployee(CreateEmployeeDto employeeDto)
         {
-            try
-            {
-                var updated = await _dataService.UpdateEmployee(employeeDto);
-                return Ok(updated);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var updated = await _dataService.UpdateEmployee(employeeDto);
+            return Ok(updated);
         }
         #endregion
 
@@ -94,52 +74,30 @@ namespace Quiz.Api.Controllers
         [HttpGet("uczniowie/{id}")]
         public async Task<IActionResult> GetStudentById(int id)
         {
-            try
-            {
-                var result = await _dataService.GetStudentById(id);
-                return Ok(result);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var result = await _dataService.GetStudentById(id);
+            return Ok(result);
         }
 
         [HttpPost("uczniowie")]
         public async Task<IActionResult> AddStudent(CreateStudentDto studentDto)
         {
-            try
-            {
-                var createdStudent = await _dataService.AddStudent(studentDto);
-                return CreatedAtAction(nameof(GetStudentById),
-                    new { id = createdStudent.Id }, createdStudent);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var createdStudent = await _dataService.AddStudent(studentDto);
+            return CreatedAtAction(nameof(GetStudentById),
+                new { id = createdStudent.Id }, createdStudent);
         }
 
         [HttpDelete("uczniowie/{id}")]
         public async Task<IActionResult> DeleteStudentById(int id)
         {
-            try
-            {
-                await _dataService.DeleteStudentById(id);
-                return NoContent();
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            await _dataService.DeleteStudentById(id);
+            return NoContent();
         }
 
         [HttpPut("uczniowie")]
         public async Task<IActionResult> UpdateStudent(CreateStudentDto studentDto)
         {
-            try
-            {
-                var updated = await _dataService.UpdateStudent(studentDto);
-                return Ok(updated);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var updated = await _dataService.UpdateStudent(studentDto);
+            return Ok(updated);
         }
         #endregion
 
@@ -154,51 +112,30 @@ namespace Quiz.Api.Controllers
         [HttpGet("adresy/{id}")]
         public async Task<IActionResult> GetAddressById([FromRoute] int id)
         {
-            try
-            {
-                var address = await _dataService.GetAddressById(id);
-                return Ok(address);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var address = await _dataService.GetAddressById(id);
+            return Ok(address);
         }
 
         [HttpPost("adresy")]
         public async Task<IActionResult> AddAddress(AddressDto addressDto)
         {
-            try
-            {
-                var createdAddress = await _dataService.AddAddress(addressDto);
-                return CreatedAtAction(nameof(GetAddressById),
-                    new { id = createdAddress.Id }, createdAddress);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var createdAddress = await _dataService.AddAddress(addressDto);
+            return CreatedAtAction(nameof(GetAddressById),
+                new { id = createdAddress.Id }, createdAddress);
         }
 
         [HttpDelete("adresy/{id}")]
         public async Task<IActionResult> DeleteAddressById([FromRoute] int id)
         {
-            try
-            {
-                await _dataService.DeleteAddressById(id);
-                return NoContent();
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            await _dataService.DeleteAddressById(id);
+            return NoContent();
         }
 
         [HttpPut("adresy")]
         public async Task<IActionResult> UpdateAddress(AddressDto addressDto)
         {
-            try
-            {
-                var updated = await _dataService.UpdateAddress(addressDto);
-                return Ok(updated);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var updated = await _dataService.UpdateAddress(addressDto);
+            return Ok(updated);
         }
         #endregion
 
@@ -213,55 +150,35 @@ namespace Quiz.Api.Controllers
         [HttpGet("pytania/{id}", Name = nameof(GetQuestionById))]
         public async Task<IActionResult> GetQuestionById([FromRoute] int id)
         {
-            try
-            {
-                var question = await _dataService.GetQuestionById(id);
-                return Ok(question);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
+            var question = await _dataService.GetQuestionById(id);
+            return Ok(question);
         }
 
         [HttpPost("pytania")]
         public async Task<IActionResult> AddQuestion(QuestionViewModel questionVM)
         {
-            try
-            {
-                if (questionVM.Id != default(int))
-                    return BadRequest("Przesłany obiekt nie może posiadać identyfikatora");
+            if (questionVM.Id != default(int))
+                return BadRequest("Przesłany obiekt nie może posiadać identyfikatora");
 
-                var question = await _dataService.AddQuestion(questionVM);
+            var question = await _dataService.AddQuestion(questionVM);
 
-                return CreatedAtAction(nameof(GetQuestionById),
-                    new { id = question.Id }, question);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            return CreatedAtAction(nameof(GetQuestionById),
+                new { id = question.Id }, question);
         }
 
         [HttpPut("pytania")]
         public async Task<IActionResult> UpdateQuestion(QuestionViewModel questionVM)
         {
-            try
-            {
-                var question = await _dataService.UpdateQuestion(questionVM);
-                return Ok(question);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var question = await _dataService.UpdateQuestion(questionVM);
+            return Ok(question);
         }
 
 
         [HttpDelete("pytania/{id}")]
         public async Task<IActionResult> DeleteQuestionById(int id)
         {
-            try
-            {
-                await _dataService.DeleteQuestionById(id);
-                return NoContent();
-            }
-            catch (DataNotFoundException e) { return BadRequest(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            await _dataService.DeleteQuestionById(id);
+            return NoContent();
         }
         #endregion
 
@@ -270,48 +187,38 @@ namespace Quiz.Api.Controllers
         public async Task<IActionResult> GetAllQuestionsSets([FromQuery] byte? difficultyId,
             [FromQuery] string? askedQuestionSetsIds)
         {
-            try
+            if (difficultyId.HasValue)
             {
-                if (difficultyId.HasValue)
-                {
-                    var difficulty = await _dataService.GetDifficultyById(difficultyId.Value);
+                var difficulty = await _dataService.GetDifficultyById(difficultyId.Value);
 
-                    //wersja aktualna, czyli np.:
-                    //dla skali BC zwróci B, C oraz BC
-                    var questionsSets = await _dataService.GetQuestionsSetsByCondition(
-                        zp => difficulty.Name.Contains(zp.SkalaTrudnosci.Nazwa) &&
-                            zp.CzyAktywny);
+                //wersja aktualna, czyli np.:
+                //dla skali BC zwróci B, C oraz BC
+                var questionsSets = await _dataService.GetQuestionsSetsByCondition(
+                    zp => difficulty.Name.Contains(zp.SkalaTrudnosci.Nazwa) &&
+                        zp.CzyAktywny);
 
-                    return Ok(questionsSets);
-                }
-
-                if (!string.IsNullOrEmpty(askedQuestionSetsIds))
-                {
-                    var listOfIds = askedQuestionSetsIds?.Split(',')?.Select(Int32.Parse)?.ToList();
-                    //Tutaj nie ma filtrowania aktywnych zestawów pytań, ponieważ musi być edycja
-                    //i podgląd ZP wchodzących w skład istniejąych diagnoz
-                    var questionsSets = await _dataService.GetQuestionsSetsByCondition(
-                        zp => listOfIds.Contains(zp.Id));
-
-                    return Ok(questionsSets);
-                }
-
-                return Ok(await _dataService.GetQuestionsSetsByCondition(zp => zp.CzyAktywny));
+                return Ok(questionsSets);
             }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+
+            if (!string.IsNullOrEmpty(askedQuestionSetsIds))
+            {
+                var listOfIds = askedQuestionSetsIds?.Split(',')?.Select(Int32.Parse)?.ToList();
+                //Tutaj nie ma filtrowania aktywnych zestawów pytań, ponieważ musi być edycja
+                //i podgląd ZP wchodzących w skład istniejąych diagnoz
+                var questionsSets = await _dataService.GetQuestionsSetsByCondition(
+                    zp => listOfIds.Contains(zp.Id));
+
+                return Ok(questionsSets);
+            }
+
+            return Ok(await _dataService.GetQuestionsSetsByCondition(zp => zp.CzyAktywny));
         }
 
         [HttpGet("zestawyPytan/{id}", Name = nameof(GetQuestionsSetById))]
         public async Task<IActionResult> GetQuestionsSetById([FromRoute] int id)
         {
-            try
-            {
-                var questionsSet = await _dataService.GetQuestionsSetById(id);
-                return Ok(questionsSet);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var questionsSet = await _dataService.GetQuestionsSetById(id);
+            return Ok(questionsSet);
         }
 
         [HttpPost("zestawyPytan")]
@@ -333,67 +240,57 @@ namespace Quiz.Api.Controllers
         public async Task<IActionResult> UpdateQuestionsSetProperty([FromRoute] int id,
             [FromBody] KeyValuePair<string, string> propertyValue)
         {
-            try
+            if (string.IsNullOrEmpty(propertyValue.Key))
+                throw new DataValidationException(
+                    "Przesłany model nie zawiera wartości do aktualizacji");
+
+            switch (propertyValue.Key)
             {
-                if (string.IsNullOrEmpty(propertyValue.Key))
-                    throw new DataValidationException(
-                        "Przesłany model nie zawiera wartości do aktualizacji");
+                case "skill":
+                    if (propertyValue.Value.Length > 2048)
+                        throw new DataValidationException(
+                            "Przesłano opis umiejętności musi mieć poniżej 2048 znaków");
 
-                switch (propertyValue.Key)
-                {
-                    case "skill":
-                        if (propertyValue.Value.Length > 2048)
-                            throw new DataValidationException(
-                                "Przesłano opis umiejętności musi mieć poniżej 2048 znaków");
+                    var updated =
+                        await _dataService.UpdateSkillDescription(id, propertyValue.Value);
 
-                        var updated =
-                            await _dataService.UpdateSkillDescription(id, propertyValue.Value);
-                        return Ok(updated);
+                    return Ok(updated);
 
-                    case "area":
-                        if (!byte.TryParse(propertyValue.Value, out byte areaId))
-                            throw new DataValidationException(
-                                "Przesłano nieprawidłowy identyfikator obszaru");
+                case "area":
+                    if (!byte.TryParse(propertyValue.Value, out byte areaId))
+                        throw new DataValidationException(
+                            "Przesłano nieprawidłowy identyfikator obszaru");
 
-                        if (areaId == default(byte))
-                            throw new DataNotFoundException();
+                    if (areaId == default(byte))
+                        throw new DataNotFoundException();
 
-                        var updatedArea = await _dataService.UpdateQuestionsSetArea(id, areaId);
+                    var updatedArea = await _dataService.UpdateQuestionsSetArea(id, areaId);
 
-                        return Ok(updatedArea);
+                    return Ok(updatedArea);
 
-                    case "difficulty":
-                        if (!byte.TryParse(propertyValue.Value, out byte difficultyId))
-                            throw new DataValidationException(
-                                "Przesłano nieprawidłowy identyfikator skali trudności");
+                case "difficulty":
+                    if (!byte.TryParse(propertyValue.Value, out byte difficultyId))
+                        throw new DataValidationException(
+                            "Przesłano nieprawidłowy identyfikator skali trudności");
 
-                        if (difficultyId == default(byte))
-                            throw new DataNotFoundException();
+                    if (difficultyId == default(byte))
+                        throw new DataNotFoundException();
 
-                        var updatedDifficulty =
-                            await _dataService.UpdateQuestionsSetDifficulty(id, difficultyId);
+                    var updatedDifficulty =
+                        await _dataService.UpdateQuestionsSetDifficulty(id, difficultyId);
 
-                        return Ok(updatedDifficulty);
+                    return Ok(updatedDifficulty);
 
-                    default:
-                        return BadRequest("Nie znaleziono właściwości do aktualizacji");
-                }
+                default:
+                    return BadRequest("Nie znaleziono właściwości do aktualizacji");
             }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
         }
 
         [HttpDelete("zestawyPytan/{id}")]
         public async Task<IActionResult> DeleteQuestionsSetById(int id)
         {
-            try
-            {
-                await _dataService.DeleteQuestionsSetById(id);
-                return NoContent();
-            }
-            catch (DataNotFoundException e) { return BadRequest(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            await _dataService.DeleteQuestionsSetById(id);
+            return NoContent();
         }
         #endregion
 
@@ -408,26 +305,16 @@ namespace Quiz.Api.Controllers
         [HttpGet("obszary/{id}")]
         public async Task<IActionResult> GetAreaById(byte id)
         {
-            try
-            {
-                var area = await _dataService.GetAreaById(id);
-                return Ok(area);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var area = await _dataService.GetAreaById(id);
+            return Ok(area);
         }
 
         [HttpPost("obszary")]
         public async Task<IActionResult> AddArea(CreateDictionaryDto createDto)
         {
-            try
-            {
-                var created = await _dataService.AddArea(createDto);
-                return CreatedAtAction(nameof(GetAreaById),
-                    new { id = created.Id }, created);
-            }
-            catch (AlreadyExistsException e) { return BadRequest(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var created = await _dataService.AddArea(createDto);
+            return CreatedAtAction(nameof(GetAreaById),
+                new { id = created.Id }, created);
         }
 
         [HttpPut("obszary")]
@@ -435,25 +322,16 @@ namespace Quiz.Api.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            try
-            {
-                var updated = await _dataService.UpdateArea(areaVM);
-                return Ok(updated);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+
+            var updated = await _dataService.UpdateArea(areaVM);
+            return Ok(updated);
         }
 
         [HttpDelete("obszary/{id}")]
         public async Task<IActionResult> DeleteAreaById(byte id)
         {
-            try
-            {
-                await _dataService.DeleteAreaById(id);
-                return NoContent();
-            }
-            catch (DataNotFoundException e) { return BadRequest(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            await _dataService.DeleteAreaById(id);
+            return NoContent();
         }
         #endregion
 
@@ -468,26 +346,16 @@ namespace Quiz.Api.Controllers
         [HttpGet("skaleTrudnosci/{id}")]
         public async Task<IActionResult> GetDifficultyById(byte id)
         {
-            try
-            {
-                var difficulty = await _dataService.GetDifficultyById(id);
-                return Ok(difficulty);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var difficulty = await _dataService.GetDifficultyById(id);
+            return Ok(difficulty);
         }
 
         [HttpPost("skaleTrudnosci")]
         public async Task<IActionResult> AddDifficulty(CreateDictionaryDto createDto)
         {
-            try
-            {
-                var created = await _dataService.AddDifficulty(createDto);
-                return CreatedAtAction(nameof(GetDifficultyById),
-                    new { id = created.Id }, created);
-            }
-            catch (AlreadyExistsException e) { return BadRequest(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var created = await _dataService.AddDifficulty(createDto);
+            return CreatedAtAction(nameof(GetDifficultyById),
+                new { id = created.Id }, created);
         }
 
         [HttpPut("skaleTrudnosci")]
@@ -496,25 +364,16 @@ namespace Quiz.Api.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            try
-            {
-                var updated = await _dataService.UpdateDifficulty(difficultyVM);
-                return Ok(updated);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+
+            var updated = await _dataService.UpdateDifficulty(difficultyVM);
+            return Ok(updated);
         }
 
         [HttpDelete("skaleTrudnosci/{id}")]
         public async Task<IActionResult> DeleteDifficultyById([FromRoute] byte id)
         {
-            try
-            {
-                await _dataService.DeleteDifficultyById(id);
-                return NoContent();
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            await _dataService.DeleteDifficultyById(id);
+            return NoContent();
         }
         #endregion
 
@@ -522,13 +381,8 @@ namespace Quiz.Api.Controllers
         [HttpGet("ocenyZestawuPytan/{id}")]
         public async Task<IActionResult> GetRatingById([FromRoute] int id)
         {
-            try
-            {
-                var rating = await _dataService.GetRatingById(id);
-                return Ok(rating);
-            }
-            catch (DataNotFoundException e) { return NotFound(); }
-            catch (Exception e) { return BadRequest(); }
+            var rating = await _dataService.GetRatingById(id);
+            return Ok(rating);
         }
 
         [HttpPut("ocenyZestawuPytan")]
@@ -536,27 +390,18 @@ namespace Quiz.Api.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            try
-            {
-                var updated = await _dataService.UpdateRating(ratingVM);
-                return Ok(updated);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+
+            var updated = await _dataService.UpdateRating(ratingVM);
+            return Ok(updated);
         }
 
         [HttpGet("ocenyZestawuPytan")]
         public async Task<IActionResult> GetRatingsByQuestionsSetId(
             [FromQuery] int questionsSetId)
         {
-            try
-            {
-                var ratings =
-                    await _dataService.GetRatingsByQuestionsSetId(questionsSetId);
-                return Ok(ratings);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var ratings =
+                await _dataService.GetRatingsByQuestionsSetId(questionsSetId);
+            return Ok(ratings);
         }
         #endregion
 
@@ -564,13 +409,8 @@ namespace Quiz.Api.Controllers
         [HttpGet("kartyPracy/{id}", Name = nameof(GetAttachmentById))]
         public async Task<IActionResult> GetAttachmentById([FromRoute] int id)
         {
-            try
-            {
-                var attachment = await _dataService.GetAttachmentById(id);
-                return Ok(attachment);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var attachment = await _dataService.GetAttachmentById(id);
+            return Ok(attachment);
         }
         #endregion
 
@@ -585,28 +425,17 @@ namespace Quiz.Api.Controllers
         [HttpGet("diagnozy/{id}")]
         public async Task<IActionResult> GetDiagnosisById(int id)
         {
-            try
-            {
-                var diagnosis = await _dataService.GetDiagnosisById(id);
-                return Ok(diagnosis);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var diagnosis = await _dataService.GetDiagnosisById(id);
+            return Ok(diagnosis);
         }
 
 
         [HttpPost("diagnozy")]
         public async Task<IActionResult> AddDiagnosis(CreateDiagnosisDto createDiagnosis)
         {
-            try
-            {
-                var diagnosis = await _dataService.AddDiagnosis(createDiagnosis);
-                return CreatedAtAction(nameof(GetDiagnosisById),
-                    new { id = diagnosis.Id }, diagnosis);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var diagnosis = await _dataService.AddDiagnosis(createDiagnosis);
+            return CreatedAtAction(nameof(GetDiagnosisById),
+                new { id = diagnosis.Id }, diagnosis);
         }
         #endregion
 
@@ -614,41 +443,25 @@ namespace Quiz.Api.Controllers
         [HttpGet("wyniki/{id}")]
         public async Task<IActionResult> GetResultById(long id)
         {
-            try
-            {
-                var result = await _dataService.GetResultById(id);
-                return Ok(result);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var result = await _dataService.GetResultById(id);
+            return Ok(result);
         }
 
         [HttpPost("wyniki")]
         public async Task<IActionResult> AddDiagnosisResult(CreateResultDto createResult)
         {
-            try
-            {
-                var result = await _dataService.AddDiagnosisResult(createResult);
-                return CreatedAtAction(nameof(GetResultById),
-                    new { id = result.Id }, result);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var result = await _dataService.AddDiagnosisResult(createResult);
+            return CreatedAtAction(nameof(GetResultById),
+                new { id = result.Id }, result);
         }
 
         [HttpGet("wyniki")]
         public async Task<IActionResult> GetResultByDiagnosisQuestionsSetIds(
             [FromQuery] int diagnosisId, [FromQuery] int questionsSetId)
         {
-            try
-            {
-                var result = await _dataService.GetResultByDiagnosisQuestionsSetIds(
-                    diagnosisId, questionsSetId);
-                return Ok(result);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var result = await _dataService.GetResultByDiagnosisQuestionsSetIds(
+                diagnosisId, questionsSetId);
+            return Ok(result);
         }
         #endregion
 
@@ -692,39 +505,22 @@ namespace Quiz.Api.Controllers
         [HttpGet("uzytkownicy/{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] int userId)
         {
-            try
-            {
-                var user = await _dataService.GetUserById(userId);
-                return Ok(user);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var user = await _dataService.GetUserById(userId);
+            return Ok(user);
         }
 
         [HttpGet("uzytkownicy")]
         public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
         {
-            try
-            {
-                var user = await _dataService.GetUserByEmail(email);
-                return Ok(user);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var user = await _dataService.GetUserByEmail(email);
+            return Ok(user);
         }
 
         [HttpPost("uzytkownicy")]
         public async Task<IActionResult> AddUser([FromBody] CreateUserDto userDto)
         {
-            try
-            {
-                var user = await _dataService.AddUser(userDto);
-                return CreatedAtAction(nameof(GetUserById),
-                    new { id = user.Id }, user);
-            }
-            catch (DataValidationException e) { return BadRequest(e.Message); }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var user = await _dataService.AddUser(userDto);
+            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
         }
         #endregion
 
@@ -732,33 +528,21 @@ namespace Quiz.Api.Controllers
         [HttpPost("raporty/{diagnosisId}")]
         public async Task<IActionResult> GenerateDiagnosisReport([FromRoute] int diagnosisId)
         {
-            try
-            {
-                var diagnosis = await _dataService.GetDiagnosisById(diagnosisId);
+            var diagnosis = await _dataService.GetDiagnosisById(diagnosisId);
 
-                if (diagnosis.ReportId.HasValue)
-                    return Ok(await _dataService.GetReportById(diagnosis.ReportId.Value));
+            if (diagnosis.ReportId.HasValue)
+                return Ok(await _dataService.GetReportById(diagnosis.ReportId.Value));
 
-                var baseReport = await _dataService.AddDiagnosisReport(diagnosis);
+            var baseReport = await _dataService.AddDiagnosisReport(diagnosis);
 
-                return Ok(baseReport);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (DataValidationException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            return Ok(baseReport);
         }
 
         [HttpGet("raporty/{reportId}")]
         public async Task<IActionResult> GetDiagnosisReport([FromRoute] int reportId)
         {
-            try
-            {
-                var report = await _dataService.GetReportById(reportId);
-                return Ok(report);
-            }
-            catch (DataNotFoundException e) { return NotFound(e.Message); }
-            catch (DataValidationException e) { return NotFound(e.Message); }
-            catch (Exception e) { return BadRequest(e.Message); }
+            var report = await _dataService.GetReportById(reportId);
+            return Ok(report);
         }
         #endregion
     }
