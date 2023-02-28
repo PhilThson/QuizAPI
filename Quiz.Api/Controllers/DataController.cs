@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure;
@@ -8,6 +9,7 @@ using Quiz.Shared.ViewModels;
 
 namespace Quiz.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class DataController : ControllerBase
