@@ -1344,7 +1344,8 @@ namespace Quiz.Infrastructure.Services
                     Id = u.Rola.Id,
                     Name = u.Rola.Nazwa,
                     Description = u.Rola.Opis
-                }
+                },
+                IsActive = u.CzyAktywny
             })
             .FirstOrDefaultAsync() ??
             throw new DataNotFoundException("Nie znaleziono użytkownika " +
@@ -1365,7 +1366,8 @@ namespace Quiz.Infrastructure.Services
                     Id = u.Rola.Id,
                     Name = u.Rola.Nazwa,
                     Description = u.Rola.Opis
-                }
+                },
+                IsActive = u.CzyAktywny
             })
             .FirstOrDefaultAsync() ??
             throw new DataNotFoundException("Nie znaleziono użytkownika " +

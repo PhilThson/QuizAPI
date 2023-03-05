@@ -5,11 +5,10 @@ using Quiz.Infrastructure.Services;
 using Quiz.Data.Data;
 using System.Runtime.InteropServices;
 using Quiz.Api.Extensions;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 internal class Program
 {
-    const string AuthSchema = "cookie";
-
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -25,7 +24,7 @@ internal class Program
             wkHtmlToPdfFileName += ".dylib";
 
         var wkHtmlToPdfPath = Path.Combine(
-            new string[] {builder.Environment.ContentRootPath, wkHtmlToPdfFileName});
+            new string[] { builder.Environment.ContentRootPath, wkHtmlToPdfFileName });
 
         //var context = new CustomAssemblyLoadContext();
         //context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(),
@@ -56,9 +55,14 @@ internal class Program
 
         //bez ustawienia domyślngeo typu/polityki uwierzytelniania,
         //Authorization Middleware nie wiedzialby, ktora polityke ma testowac
-        builder.Services.AddAuthentication(AuthSchema)
+        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             //bez podania nazwy, bedzie 'Cookies'
-            .AddCookie(AuthSchema, o => o.LoginPath = "/api/user/login");
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, o =>
+            {
+                o.LoginPath = "/api/user/login";
+                o.LogoutPath = "/api/user/logout";
+                o.Cookie.Name = "quiz-user";
+            });
 
         //Brak uwierzytelnienie spowoduje przekierowanie na podany endpoint
 
@@ -80,7 +84,8 @@ internal class Program
             app.Seed();
         //}
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
+        app.HandleExceptions();
 
         app.UseAuthentication();
         //Po dodaniu atrybutu Authorize rzucalo 500tka
@@ -88,11 +93,10 @@ internal class Program
         //to dlatego ze ClaimsIdentity musi posiadac zgodny Authentication Type
         //Odpowiedz 404 bieze sie z domyslnego przekierowania (302) na strone logowania
         //Microsoftu, ale API go nie posiada wiec jest 404
-        //Doslownie:
+        //Dosłownie:
         //https://localhost:7011/Account/Login?ReturnUrl=/api/User/data
-        app.UseAuthorization();
 
-        app.HandleExceptions();
+        app.UseAuthorization();
 
         app.MapControllers();
 

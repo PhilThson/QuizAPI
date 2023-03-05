@@ -492,38 +492,6 @@ namespace Quiz.Api.Controllers
         }
         #endregion
 
-        #region Role
-        [HttpGet("role")]
-        public async Task<IActionResult> GetAllRoles()
-        {
-            var roles = await _dataService.GetAllRoles();
-            return Ok(roles);
-        }
-        #endregion
-
-        #region Użytkownicy
-        [HttpGet("uzytkownicy/{id}")]
-        public async Task<IActionResult> GetUserById([FromRoute] int userId)
-        {
-            var user = await _dataService.GetUserById(userId);
-            return Ok(user);
-        }
-
-        [HttpGet("uzytkownicy")]
-        public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
-        {
-            var user = await _dataService.GetUserByEmail(email);
-            return Ok(user);
-        }
-
-        [HttpPost("uzytkownicy")]
-        public async Task<IActionResult> AddUser([FromBody] CreateUserDto userDto)
-        {
-            var user = await _dataService.AddUser(userDto);
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
-        }
-        #endregion
-
         #region Raporty
         [HttpPost("raporty/{diagnosisId}")]
         public async Task<IActionResult> GenerateDiagnosisReport([FromRoute] int diagnosisId)

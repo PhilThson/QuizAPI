@@ -37,6 +37,7 @@
     <None Remove="libwkhtmltox.so" />
     <None Remove="CustomMiddleware\" />
     <None Remove="Extensions\" />
+    <None Remove="Filters\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quiz.Data\Quiz.Data.csproj">
@@ -58,6 +59,7 @@
       <Folder Include="Utilities\" />
       <Folder Include="CustomMiddleware\" />
       <Folder Include="Extensions\" />
+      <Folder Include="Filters\" />
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Include="libwkhtmltox.dll">
