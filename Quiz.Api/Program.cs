@@ -64,16 +64,6 @@ internal class Program
                 o.Cookie.Name = "quiz-user";
             });
 
-        //Brak uwierzytelnienie spowoduje przekierowanie na podany endpoint
-
-
-        //ciastko jest wysylane przy kazdym zadaniu do tej samej domeny
-
-        //builder.Services.AddAuthorization();
-        //    c.AddPolicy("user", p =>
-        //        p.AddAuthenticationSchemes(AuthSchema)
-        //        .RequireClaim("user")));
-
         var app = builder.Build();
 
         //Zakomentowane - bo były problemy przy uruchamianiu w Dockerze
@@ -88,13 +78,6 @@ internal class Program
         app.HandleExceptions();
 
         app.UseAuthentication();
-        //Po dodaniu atrybutu Authorize rzucalo 500tka
-        //dlatego dodane zostalo authorization
-        //to dlatego ze ClaimsIdentity musi posiadac zgodny Authentication Type
-        //Odpowiedz 404 bieze sie z domyslnego przekierowania (302) na strone logowania
-        //Microsoftu, ale API go nie posiada wiec jest 404
-        //Dosłownie:
-        //https://localhost:7011/Account/Login?ReturnUrl=/api/User/data
 
         app.UseAuthorization();
 

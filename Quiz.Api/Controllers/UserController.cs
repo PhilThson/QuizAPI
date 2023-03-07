@@ -31,37 +31,6 @@ namespace Quiz.Api.Controllers
 
         #region Actions
 
-        [HttpPost("token")]
-        public IActionResult GetToken([FromBody] TokenDto content)
-        {
-            var rsaKey = RSA.Create();
-            rsaKey.ImportRSAPrivateKey(content?.PrivateKey, out _);
-
-            //handler do tworzenie i walidacji tokenów
-            var handler = new JsonWebTokenHandler();
-
-            var key = new RsaSecurityKey(rsaKey);
-
-            var token = handler.CreateToken(new SecurityTokenDescriptor()
-            {
-                Issuer = "https://localhost:7011",
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim("sub", Guid.NewGuid().ToString()),
-                    new Claim("name", "Filip")
-                }),
-                SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256),
-            });
-
-            return Ok(token);
-        }
-
-        [HttpGet("auth")]
-        public IActionResult TryAuthenticate([FromQuery] string token)
-        {
-            return Ok(User.FindFirst("sub")?.Value ?? "empty");
-        }
-
         [HttpGet("login")]
         public IActionResult Login([FromQuery] string returnUrl = "/")
         {
@@ -107,8 +76,7 @@ namespace Quiz.Api.Controllers
             return NoContent();
         }
 
-        //[ActiveUser]
-        //[Authorize] - też działa
+        [ActiveUser]
         [HttpGet("data")]
         public IActionResult GetData()
         {

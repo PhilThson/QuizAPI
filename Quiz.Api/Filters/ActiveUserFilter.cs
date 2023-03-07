@@ -7,7 +7,7 @@ using Quiz.Infrastructure.Interfaces;
 
 namespace Quiz.Api.Filters
 {
-	public class ActiveUserFilter : AuthorizeAttribute, IAuthorizationFilter
+	public class ActiveUserFilter : AuthorizeAttribute, IAsyncAuthorizationFilter
 	{
         private readonly IDataService _dataService;
 
@@ -16,9 +16,8 @@ namespace Quiz.Api.Filters
             _dataService = dataService;
         }
 
-        public async void OnAuthorization(AuthorizationFilterContext context)
+        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            //context.HttpContext.Request.Headers.Cookie.FirstOrDefault(c => c.StartsWith());
             try
             {
                 var email = context.HttpContext.User.FindFirst("user")?.Value ??
@@ -32,7 +31,6 @@ namespace Quiz.Api.Filters
             catch (Exception e)
             {
                 context.Result = new UnauthorizedResult();
-                return;
             }
         }
     }
