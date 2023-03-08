@@ -59,6 +59,7 @@ internal class Program
             //bez podania nazwy, bedzie 'Cookies'
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, o =>
             {
+                o.Cookie.HttpOnly = true;
                 o.LoginPath = "/api/user/login";
                 o.LogoutPath = "/api/user/logout";
                 o.Cookie.Name = "quiz-user";

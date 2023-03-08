@@ -21,7 +21,7 @@ namespace Quiz.Api.Filters
             try
             {
                 var email = context.HttpContext.User.FindFirst("user")?.Value ??
-                    throw new AuthenticationException();
+                    throw new AuthenticationException("Brak zalogowanego użytkownika");
 
                 var user = await _dataService.GetUserByEmail(email);
 
@@ -30,7 +30,10 @@ namespace Quiz.Api.Filters
             }
             catch (Exception e)
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new ObjectResult(e.Message)
+                {
+                    StatusCode = StatusCodes.Status401Unauthorized
+                };
             }
         }
     }

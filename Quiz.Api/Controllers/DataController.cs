@@ -10,7 +10,7 @@ using Quiz.Shared.ViewModels;
 
 namespace Quiz.Api.Controllers
 {
-    [Authorize]
+    [ActiveUser]
     [Route("api/[controller]")]
     [ApiController]
     public class DataController : ControllerBase
