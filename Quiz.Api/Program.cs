@@ -8,6 +8,9 @@ using Quiz.Api.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using NLog;
 using NLog.Web;
+using Quiz.Api.Utilities;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 
 internal class Program
 {
@@ -35,9 +38,9 @@ internal class Program
             var wkHtmlToPdfPath = Path.Combine(
                 new string[] { builder.Environment.ContentRootPath, wkHtmlToPdfFileName });
 
-            //var context = new CustomAssemblyLoadContext();
-            //context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(),
-            //    wkHtmlToPdfPath));
+            var context = new CustomAssemblyLoadContext();
+            context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(),
+                wkHtmlToPdfPath));
 
             //generowanie odpowiedzi Json
             builder.Services.AddControllers()
@@ -52,15 +55,15 @@ internal class Program
                 o.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
             builder.Services.AddScoped<IDataService, DataService>();
-            //builder.Services.AddScoped<IDocumentService, DocumentService>();
-            //builder.Services.AddScoped<IRazorRendererService, RazorRendererService>();
+            builder.Services.AddScoped<IDocumentService, DocumentService>();
+            builder.Services.AddScoped<IRazorRendererService, RazorRendererService>();
 
             //Wykorzystanie biblioteki DinkToPdf jako wrappera na 'wkhtmltopdf'
             //silnika do zamiany kodu html na dokkument PDF
             //wkhtmltopdf - command line tools to render HTML into PDF and various
             //image formats using the Qt WebKit rendering engine
-            //builder.Services.AddSingleton(typeof(IConverter),
-            //    new SynchronizedConverter(new PdfTools()));
+            builder.Services.AddSingleton(typeof(IConverter),
+                new SynchronizedConverter(new PdfTools()));
 
             //bez ustawienia domyślngeo typu/polityki uwierzytelniania,
             //Authorization Middleware nie wiedzialby, ktora polityke ma testowac
