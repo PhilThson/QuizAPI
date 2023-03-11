@@ -9,6 +9,7 @@ namespace Quiz.Shared.DTOs
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public RoleDto Role { get; set; }
+        public bool IsActive { get; set; }
     }
 }
 

@@ -27,6 +27,9 @@ namespace Quiz.Api.CustomMiddleware
 					case AlreadyExistsException:
                         context.Response.StatusCode = StatusCodes.Status400BadRequest;
 						break;
+					case AuthenticationException:
+						context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+						break;
                     case DataNotFoundException:
 						context.Response.StatusCode = StatusCodes.Status404NotFound;
 						break;

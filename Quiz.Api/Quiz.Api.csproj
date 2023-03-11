@@ -25,6 +25,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.14" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.2.2" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +40,7 @@
     <None Remove="libwkhtmltox.so" />
     <None Remove="CustomMiddleware\" />
     <None Remove="Extensions\" />
+    <None Remove="Filters\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quiz.Data\Quiz.Data.csproj">
@@ -58,6 +62,7 @@
       <Folder Include="Utilities\" />
       <Folder Include="CustomMiddleware\" />
       <Folder Include="Extensions\" />
+      <Folder Include="Filters\" />
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Include="libwkhtmltox.dll">

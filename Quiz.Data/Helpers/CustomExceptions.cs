@@ -32,4 +32,15 @@ namespace Quiz.Data.Helpers
 			: base(message)
 		{ }
     }
+
+	public class AuthenticationException : Exception
+	{
+		public AuthenticationException()
+			: base("Nie udało się pobrać użytkownika")
+		{ }
+
+		public AuthenticationException(string message)
+			: base(message)
+		{ }
+	}
 }

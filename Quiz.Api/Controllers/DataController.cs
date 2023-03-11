@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
+using Quiz.Api.Filters;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure;
 using Quiz.Infrastructure.Interfaces;
@@ -9,7 +10,7 @@ using Quiz.Shared.ViewModels;
 
 namespace Quiz.Api.Controllers
 {
-    [Authorize]
+    [ActiveUser]
     [Route("api/[controller]")]
     [ApiController]
     public class DataController : ControllerBase
@@ -489,38 +490,6 @@ namespace Quiz.Api.Controllers
         {
             var branches = await _dataService.GetAllBranches();
             return Ok(branches);
-        }
-        #endregion
-
-        #region Role
-        [HttpGet("role")]
-        public async Task<IActionResult> GetAllRoles()
-        {
-            var roles = await _dataService.GetAllRoles();
-            return Ok(roles);
-        }
-        #endregion
-
-        #region Użytkownicy
-        [HttpGet("uzytkownicy/{id}")]
-        public async Task<IActionResult> GetUserById([FromRoute] int userId)
-        {
-            var user = await _dataService.GetUserById(userId);
-            return Ok(user);
-        }
-
-        [HttpGet("uzytkownicy")]
-        public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
-        {
-            var user = await _dataService.GetUserByEmail(email);
-            return Ok(user);
-        }
-
-        [HttpPost("uzytkownicy")]
-        public async Task<IActionResult> AddUser([FromBody] CreateUserDto userDto)
-        {
-            var user = await _dataService.AddUser(userDto);
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
         }
         #endregion
 
