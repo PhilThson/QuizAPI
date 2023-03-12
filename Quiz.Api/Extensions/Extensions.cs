@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.Console;
-using Quiz.Infrastructure.Helpers;
+using Quiz.Infrastructure.Logging;
 
 namespace Quiz.Api.Extensions
 {

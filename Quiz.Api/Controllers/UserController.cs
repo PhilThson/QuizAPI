@@ -1,14 +1,11 @@
 ﻿using System.Security.Claims;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
 using Quiz.Api.Filters;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure.Interfaces;
+using Quiz.Infrastructure.Logging;
 using Quiz.Shared.DTOs;
 
 namespace Quiz.Api.Controllers
@@ -62,6 +59,7 @@ namespace Quiz.Api.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
                 });
 
+            _logger.Info($"Zalogowano użytkownika '{user.Email}'");
             return Ok("Zalogowano");
         }
 
@@ -89,11 +87,6 @@ namespace Quiz.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
-            _logger.LogInformation("Informacja");
-            int pierwszy = 1;
-            _logger.LogWarning("Ostrzeżenie nr {pierwszy}", pierwszy);
-            string drugi = "Kardynalny";
-            _logger.LogError("Błąd: {drugi}", drugi);
             var user = await _dataService.GetUserById(id);
             return Ok(user);
         }
@@ -102,7 +95,6 @@ namespace Quiz.Api.Controllers
         public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
         {
             var user = await _dataService.GetUserByEmail(email);
-            _logger.LogInformation("Pobrano użytkownika: {email}", email);
             return Ok(user);
         }
 
@@ -117,7 +109,6 @@ namespace Quiz.Api.Controllers
         [HttpGet("roles")]
         public async Task<IActionResult> GetAllRoles()
         {
-            _logger.LogInformation("Pobrane wszystkie role");
             var roles = await _dataService.GetAllRoles();
             return Ok(roles);
         }

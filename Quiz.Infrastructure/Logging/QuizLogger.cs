@@ -2,19 +2,28 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Quiz.Data.Helpers;
+using Quiz.Infrastructure.Interfaces;
 
-namespace Quiz.Infrastructure.Helpers
+namespace Quiz.Infrastructure.Logging
 {
     public class QuizLogger : ILogger
     {
         private readonly string _connectionString;
+        private readonly string _name;
         private readonly HttpContext? _httpContext;
+        private readonly IBackgroundJobQueue _backgroundJobQueue;
+        private readonly CancellationTokenSource _cts = new();
 
-        public QuizLogger(IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor)
+        public QuizLogger(string name,
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor,
+            IBackgroundJobQueue backgroundJobQueue)
         {
+            _name = name;
             _connectionString = configuration.GetConnectionString("Default");
             _httpContext = httpContextAccessor.HttpContext;
+            _backgroundJobQueue = backgroundJobQueue;
         }
 
         public IDisposable BeginScope<TState>(TState state)
@@ -27,24 +36,33 @@ namespace Quiz.Infrastructure.Helpers
             return logLevel != LogLevel.None;
         }
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        public void Log<TState>(LogLevel logLevel, 
+            EventId eventId, 
+            TState state, 
+            Exception? exception, 
+            Func<TState, Exception?, string> formatter
+            )
         {
-            if (eventId.Id != 0)
-                return;
-
-            if (!string.IsNullOrEmpty(eventId.Name) &&
-                eventId.Name.StartsWith("Executing"))
+            if (eventId.Id != QuizConstants.EventId)
                 return;
 
             var message = formatter(state, exception);
-            var logger = state?.GetType().FullName;
             var requestUrl = _httpContext?.Request.Path.Value;
             var requestType = _httpContext?.Request.Method;
+            var token = _cts.Token;
 
+            _backgroundJobQueue.Enqueue(async (token) =>
+                await PerformLogging(logLevel, exception, message, _name, requestUrl, requestType, token));
+        }
+
+        private async Task PerformLogging(LogLevel logLevel, Exception? exception, 
+            string message, string? logger, string? requestUrl, string? requestType,
+            CancellationToken cancelToken)
+        {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 string sql = @"INSERT INTO Logi (Timestamp,Level,Message,Logger,RequestUrl,RequestType,Exception) 
-                                VALUES (@timestamp, @level, @message, @logger, @requestUrl, @requestType, @exception)";
+                               VALUES (@timestamp, @level, @message, @logger, @requestUrl, @requestType, @exception)";
 
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
@@ -57,7 +75,7 @@ namespace Quiz.Infrastructure.Helpers
                     var exceptionParam = command.Parameters.AddWithValue("@exception", exception?.ToString() ?? (object)DBNull.Value);
 
                     connection.Open();
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync(cancelToken);
                     connection.Close();
                 }
             }

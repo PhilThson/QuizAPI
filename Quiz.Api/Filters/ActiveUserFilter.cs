@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure.Interfaces;
+using Quiz.Infrastructure.Logging;
 
 namespace Quiz.Api.Filters
 {
@@ -32,7 +33,7 @@ namespace Quiz.Api.Filters
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e.Message);
+                _logger.Warn(e.Message);
 
                 context.Result = new ObjectResult(e.Message)
                 {

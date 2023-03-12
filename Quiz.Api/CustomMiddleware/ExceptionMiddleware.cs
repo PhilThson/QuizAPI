@@ -1,13 +1,13 @@
-﻿using System;
-using Quiz.Data.Helpers;
+﻿using Quiz.Data.Helpers;
+using Quiz.Infrastructure.Logging;
 
 namespace Quiz.Api.CustomMiddleware
 {
-    public class ExceptionMiddleware
+	public class ExceptionMiddleware
 	{
 		private readonly RequestDelegate _next;
 		private readonly ILogger<ExceptionMiddleware> _logger;
-		private static string defualtMessage = "Błąd przetwarzania żądania.";
+		private readonly string _defualtMessage = "Wystąpił błąd wewnętrzny aplikacji.";
 
 		public ExceptionMiddleware(RequestDelegate next, 
 			ILogger<ExceptionMiddleware> logger)
@@ -24,16 +24,19 @@ namespace Quiz.Api.CustomMiddleware
 			}
 			catch(Exception e)
 			{
-				context.Response.StatusCode = e switch
+				var message = string.IsNullOrEmpty(e.Message) ? _defualtMessage : e.Message;
+
+                context.Response.StatusCode = e switch
 				{
-					DataValidationException or AlreadyExistsException => StatusCodes.Status400BadRequest,
+					DataValidationException or 
+					AlreadyExistsException => StatusCodes.Status400BadRequest,
 					AuthenticationException => StatusCodes.Status401Unauthorized,
 					DataNotFoundException => StatusCodes.Status404NotFound,
 					_ => StatusCodes.Status500InternalServerError,
 				};
 
-				await context.Response.WriteAsync(e.Message);
-				_logger.LogWarning(e, "{message}", e.Message);
+				await context.Response.WriteAsync(message);
+				_logger.Warn(message);
 			}
 		}
 	}
