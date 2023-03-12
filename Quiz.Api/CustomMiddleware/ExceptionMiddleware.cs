@@ -6,14 +6,17 @@ namespace Quiz.Api.CustomMiddleware
     public class ExceptionMiddleware
 	{
 		private readonly RequestDelegate _next;
+		private readonly ILogger<ExceptionMiddleware> _logger;
 		private static string defualtMessage = "Błąd przetwarzania żądania.";
 
-		public ExceptionMiddleware(RequestDelegate next)
+		public ExceptionMiddleware(RequestDelegate next, 
+			ILogger<ExceptionMiddleware> logger)
 		{
 			_next = next;
+			_logger = logger;
 		}
 
-        public async Task InvokeAsync(HttpContext context)
+		public async Task InvokeAsync(HttpContext context)
 		{
             try
 			{
@@ -21,24 +24,16 @@ namespace Quiz.Api.CustomMiddleware
 			}
 			catch(Exception e)
 			{
-				switch(e)
+				context.Response.StatusCode = e switch
 				{
-					case DataValidationException:
-					case AlreadyExistsException:
-                        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-						break;
-					case AuthenticationException:
-						context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-						break;
-                    case DataNotFoundException:
-						context.Response.StatusCode = StatusCodes.Status404NotFound;
-						break;
-					default:
-						context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-						break;
-				}
+					DataValidationException or AlreadyExistsException => StatusCodes.Status400BadRequest,
+					AuthenticationException => StatusCodes.Status401Unauthorized,
+					DataNotFoundException => StatusCodes.Status404NotFound,
+					_ => StatusCodes.Status500InternalServerError,
+				};
 
 				await context.Response.WriteAsync(e.Message);
+				_logger.LogWarning(e, "{message}", e.Message);
 			}
 		}
 	}

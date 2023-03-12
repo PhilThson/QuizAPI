@@ -6,20 +6,21 @@ using Quiz.Data.Data;
 using System.Runtime.InteropServices;
 using Quiz.Api.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using NLog;
-using NLog.Web;
+//using NLog;
+//using NLog.Web;
 using Quiz.Api.Utilities;
 using DinkToPdf.Contracts;
 using DinkToPdf;
+using Quiz.Infrastructure.Helpers;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
-        var logger = NLog.LogManager
-            .Setup()
-            .LoadConfigurationFromAppSettings()
-            .GetCurrentClassLogger();
+        //var logger = LogManager
+        //    .Setup()
+        //    .LoadConfigurationFromAppSettings()
+        //    .GetCurrentClassLogger();
 
         try
         {
@@ -47,6 +48,8 @@ internal class Program
                 .AddJsonOptions(o => o.JsonSerializerOptions.DefaultIgnoreCondition
                 = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull);
 
+            builder.Services.AddHttpContextAccessor();
+
             builder.Services.AddEndpointsApiExplorer();
 
             builder.Services.AddSwaggerGen();
@@ -57,6 +60,10 @@ internal class Program
             builder.Services.AddScoped<IDataService, DataService>();
             builder.Services.AddScoped<IDocumentService, DocumentService>();
             builder.Services.AddScoped<IRazorRendererService, RazorRendererService>();
+            //builder.Services.AddScoped<ILogAdapter, LogAdapter>();
+
+            builder.Services.AddSingleton<ILoggerProvider, QuizLoggerProvider>();
+            //builder.Services.AddSingleton<ILogger, QuizLogger>();
 
             //Wykorzystanie biblioteki DinkToPdf jako wrappera na 'wkhtmltopdf'
             //silnika do zamiany kodu html na dokkument PDF
@@ -77,11 +84,13 @@ internal class Program
                     o.Cookie.Name = "quiz-user";
                 });
 
-            builder.Logging
-                .ClearProviders()
-                .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+            //builder.Logging
+            //    .AddConsole()
+            //    .AddDebug()
+            //    .SetMinimumLevel(LogLevel.Debug);
 
-            builder.Host.UseNLog();
+
+            //builder.Host.UseNLog();
 
             var app = builder.Build();
 
@@ -106,12 +115,12 @@ internal class Program
         }
         catch (Exception ex)
         {
-            logger.Error(ex);
+            //logger.Error(ex);
             throw;
         }
         finally
         {
-            NLog.LogManager.Shutdown();
+            //LogManager.Shutdown();
         }
     }
 }

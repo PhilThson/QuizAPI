@@ -19,15 +19,17 @@ namespace Quiz.Api.Controllers
     {
         #region Private fields
         private readonly IDataService _dataService;
+        private readonly ILogger<UserController> _logger;
         #endregion
 
         #region Constructor
-        public UserController(IDataService dataService)
+        public UserController(IDataService dataService, 
+            ILogger<UserController> logger)
         {
             _dataService = dataService;
+            _logger = logger;
         }
         #endregion
-
 
         #region Actions
 
@@ -85,9 +87,14 @@ namespace Quiz.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById([FromRoute] int userId)
+        public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
-            var user = await _dataService.GetUserById(userId);
+            _logger.LogInformation("Informacja");
+            int pierwszy = 1;
+            _logger.LogWarning("Ostrzeżenie nr {pierwszy}", pierwszy);
+            string drugi = "Kardynalny";
+            _logger.LogError("Błąd: {drugi}", drugi);
+            var user = await _dataService.GetUserById(id);
             return Ok(user);
         }
 
@@ -95,6 +102,7 @@ namespace Quiz.Api.Controllers
         public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
         {
             var user = await _dataService.GetUserByEmail(email);
+            _logger.LogInformation("Pobrano użytkownika: {email}", email);
             return Ok(user);
         }
 
@@ -109,6 +117,7 @@ namespace Quiz.Api.Controllers
         [HttpGet("roles")]
         public async Task<IActionResult> GetAllRoles()
         {
+            _logger.LogInformation("Pobrane wszystkie role");
             var roles = await _dataService.GetAllRoles();
             return Ok(roles);
         }
