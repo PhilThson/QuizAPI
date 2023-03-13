@@ -30,13 +30,13 @@ COPY ["Quiz.Api/Quiz.Api.csproj", "Quiz.Api/"]
 COPY ["Quiz.Data/Quiz.Data.csproj", "Quiz.Data/"]
 COPY ["Quiz.Infrastructure/Quiz.Infrastructure.csproj", "Quiz.Infrastructure/"]
 COPY ["Quiz.Shared/Quiz.Shared.csproj", "Quiz.Shared/"]
-RUN dotnet restore "Quiz.Api/Quiz.Api.csproj"
+RUN dotnet restore "Quiz.Api/Quiz.Api.csproj" --disable-parallel
 COPY . .
 WORKDIR "/src/Quiz.Api"
-RUN dotnet build "Quiz.Api.csproj" -c Release -o /app/build
+RUN dotnet build "Quiz.Api.csproj" -c Release -o /app/build --no-restore
 
 FROM build AS publish
-RUN dotnet publish "Quiz.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Quiz.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false --no-restore
 
 
 FROM base AS final

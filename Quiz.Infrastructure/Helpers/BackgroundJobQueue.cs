@@ -10,19 +10,14 @@ namespace Quiz.Infrastructure.Helpers
         public void Enqueue(Func<CancellationToken, Task> taskFactory)
         {
             _ = taskFactory ?? throw new ArgumentNullException(nameof(taskFactory));
-
+            
             _queue.Enqueue(taskFactory);
         }
 
-        public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
+        public Func<CancellationToken, Task>? Dequeue()
         {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                if (_queue.TryDequeue(out var taskFactory))
-                    return taskFactory;
-
-                await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
-            }
+            if (_queue.TryDequeue(out var taskFactory))
+                return taskFactory;
 
             return null;
         }

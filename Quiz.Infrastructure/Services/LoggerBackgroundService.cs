@@ -22,7 +22,7 @@ namespace Quiz.Infrastructure.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var job = await _jobQueue.DequeueAsync(stoppingToken);
+                var job = _jobQueue.Dequeue();
 
                 if (job != null)
                 {
@@ -33,13 +33,12 @@ namespace Quiz.Infrastructure.Services
                     catch (Exception e)
                     {
                         Debug.WriteLine("Niepowodzenie w trakcie przetwarzania żądania. '{e}'", e.Message);
+                        _logger.LogError(e, "Wystąpił błąd wykonywania zadania w tle");
                     }
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
             }
-
-            //return Task.CompletedTask;
         }
     }
 }

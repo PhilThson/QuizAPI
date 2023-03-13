@@ -52,6 +52,9 @@ internal class Program
         builder.Services.AddScoped<IDocumentService, DocumentService>();
         builder.Services.AddScoped<IRazorRendererService, RazorRendererService>();
 
+        builder.Services.Configure<HostOptions>(config =>
+            config.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore);
+
         builder.Services.AddHostedService<LoggerBackgroundService>();
         builder.Services.AddSingleton<IBackgroundJobQueue, BackgroundJobQueue>();
 
