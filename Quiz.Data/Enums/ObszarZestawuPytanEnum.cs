@@ -4,13 +4,13 @@ namespace Quiz.Data.Enums
 {
     public enum ObszarZestawuPytanEnum
     {
-        [Description("Pierwszy obszar")]
+        [Description("Myślenie")]
         PierwszyObszar,
-        [Description("Drugi obszar")]
+        [Description("Lateralizacja")]
         DrugiObszar,
-        [Description("Trzeci obszar")]
+        [Description("Strefa słowna")]
         TrzeciObszar,
-        [Description("Czwarty obszar")]
+        [Description("Strefa bezsłowna")]
         CzwartyObszar,
         [Description("Podstawowe wiadomości")]
         PiatyObszar,

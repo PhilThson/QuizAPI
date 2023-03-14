@@ -11,6 +11,7 @@ using DinkToPdf.Contracts;
 using DinkToPdf;
 using Quiz.Infrastructure.Logging;
 using Quiz.Infrastructure.Helpers;
+using Quiz.Data.Helpers;
 
 internal class Program
 {
@@ -18,10 +19,10 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        //do generowania dokumentów PDF za pomocą RazorView
+        // generowanie dokumentów PDF za pomocą RazorView
         builder.Services.AddMvc().AddControllersAsServices();
 
-        //Ładowanie zewnętrznych bibliotek
+        // ładowanie zewnętrznych bibliotek
         var wkHtmlToPdfFileName = "libwkhtmltox";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             wkHtmlToPdfFileName += ".so";
@@ -60,8 +61,8 @@ internal class Program
 
         //Wykorzystanie biblioteki DinkToPdf jako wrappera na 'wkhtmltopdf'
         //silnika do zamiany kodu html na dokkument PDF
-        //wkhtmltopdf - command line tools to render HTML into PDF and various
-        //image formats using the Qt WebKit rendering engine
+        //(wkhtmltopdf - command line tools to render HTML into PDF and various
+        //image formats using the Qt WebKit rendering engine)
         builder.Services.AddSingleton(typeof(IConverter),
             new SynchronizedConverter(new PdfTools()));
 
@@ -71,7 +72,7 @@ internal class Program
                 o.Cookie.HttpOnly = true;
                 o.LoginPath = "/api/user/login";
                 o.LogoutPath = "/api/user/logout";
-                o.Cookie.Name = "quiz-user";
+                o.Cookie.Name = QuizConstants.UserCookieName;
             });
 
         builder.Services.AddSingleton<ILoggerProvider, QuizLoggerProvider>();

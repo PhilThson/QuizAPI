@@ -10,7 +10,6 @@ using Quiz.Infrastructure.Helpers;
 using Quiz.Shared.DTOs;
 using Quiz.Shared.DTOs.Read;
 using Quiz.Shared.ViewModels;
-using System.Net;
 
 namespace Quiz.Infrastructure.Services
 {
