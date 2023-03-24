@@ -1,5 +1,6 @@
-﻿using Quiz.Data.Helpers;
-using Quiz.Infrastructure.Logging;
+﻿using Newtonsoft.Json;
+using Quiz.Data.Helpers;
+using Quiz.Infrastructure.Helpers;
 
 namespace Quiz.Api.CustomMiddleware
 {
@@ -24,19 +25,28 @@ namespace Quiz.Api.CustomMiddleware
 			}
 			catch(Exception e)
 			{
-				var message = string.IsNullOrEmpty(e.Message) ? _defualtMessage : e.Message;
-
                 context.Response.StatusCode = e switch
 				{
 					DataValidationException or 
 					AlreadyExistsException => StatusCodes.Status400BadRequest,
 					AuthenticationException => StatusCodes.Status401Unauthorized,
+					InactiveUserException => StatusCodes.Status403Forbidden,
 					DataNotFoundException => StatusCodes.Status404NotFound,
 					_ => StatusCodes.Status500InternalServerError,
 				};
 
-				await context.Response.WriteAsync(message);
-				_logger.Warn(message);
+				var logMessage = new LogMessage
+				{
+					Message = string.IsNullOrEmpty(e.Message) ? 
+						_defualtMessage : e.Message,
+					RequestUrl = context?.Request.Path.Value,
+					RequestType = context?.Request.Method
+				};
+
+				_logger.Log(LogLevel.Warning, new EventId(QuizConstants.EventId, 
+					JsonConvert.SerializeObject(logMessage)), null);
+
+				await context.Response.WriteAsync(logMessage.Message);
 			}
 		}
 	}

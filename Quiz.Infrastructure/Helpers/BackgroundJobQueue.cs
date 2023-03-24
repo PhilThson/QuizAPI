@@ -5,19 +5,19 @@ namespace Quiz.Infrastructure.Helpers
 {
     public class BackgroundJobQueue : IBackgroundJobQueue
     {
-        private readonly ConcurrentQueue<Func<CancellationToken, Task>> _queue = new();
+        private readonly ConcurrentQueue<Action> _queue = new();
 
-        public void Enqueue(Func<CancellationToken, Task> taskFactory)
+        public void Enqueue(Action action)
         {
-            _ = taskFactory ?? throw new ArgumentNullException(nameof(taskFactory));
+            _ = action ?? throw new ArgumentNullException(nameof(action));
             
-            _queue.Enqueue(taskFactory);
+            _queue.Enqueue(action);
         }
 
-        public Func<CancellationToken, Task>? Dequeue()
+        public Action? Dequeue()
         {
-            if (_queue.TryDequeue(out var taskFactory))
-                return taskFactory;
+            if (_queue.TryDequeue(out var action))
+                return action;
 
             return null;
         }

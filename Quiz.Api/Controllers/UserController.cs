@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Quiz.Api.Filters;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure.Interfaces;
-using Quiz.Infrastructure.Logging;
 using Quiz.Shared.DTOs;
 
 namespace Quiz.Api.Controllers
@@ -59,7 +58,8 @@ namespace Quiz.Api.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
                 });
 
-            _logger.Info($"Zalogowano użytkownika '{user.Email}'");
+            //_logger.Info($"Zalogowano użytkownika '{user.Email}'");
+            _logger.LogInformation("Zalogowano użytkownika: {0}", user.Email);
             return Ok("Zalogowano");
         }
 

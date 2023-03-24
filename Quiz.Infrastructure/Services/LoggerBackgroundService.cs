@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Quiz.Infrastructure.Interfaces;
-using System.Diagnostics;
 
 namespace Quiz.Infrastructure.Services
 {
@@ -11,7 +10,7 @@ namespace Quiz.Infrastructure.Services
         private readonly IBackgroundJobQueue _jobQueue;
 
         public LoggerBackgroundService(
-            ILogger<LoggerBackgroundService> logger, 
+            ILogger<LoggerBackgroundService> logger,
             IBackgroundJobQueue jobQueue)
         {
             _logger = logger;
@@ -23,18 +22,18 @@ namespace Quiz.Infrastructure.Services
             while (!stoppingToken.IsCancellationRequested)
             {
                 var job = _jobQueue.Dequeue();
-
-                if (job != null)
+                try
                 {
-                    try
+                    if (job is not null)
                     {
-                        await job(stoppingToken);
+                        job();
                     }
-                    catch (Exception e)
-                    {
-                        Debug.WriteLine("Niepowodzenie w trakcie przetwarzania żądania. '{e}'", e.Message);
-                        _logger.LogError(e, "Wystąpił błąd wykonywania zadania w tle");
-                    }
+                }
+                catch (Exception e)
+                {
+                    //tutaj nie będzie zapętlenia, z racji na to, że customowy logger, loguje
+                    //tylko zdarzenia o zdefiniowanym wcześniej Id
+                    _logger.LogError(e, "Niepowodzenie w trakcie przetwarzania żądania w tle.");
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);

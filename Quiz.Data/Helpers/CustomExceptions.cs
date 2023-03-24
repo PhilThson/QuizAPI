@@ -43,4 +43,15 @@ namespace Quiz.Data.Helpers
 			: base(message)
 		{ }
 	}
+
+	public class InactiveUserException : Exception
+	{
+		public InactiveUserException()
+			: base("Użytkownik jest nieaktywny")
+		{ }
+
+		public InactiveUserException(string message)
+			: base(message)
+		{ }
+	}
 }

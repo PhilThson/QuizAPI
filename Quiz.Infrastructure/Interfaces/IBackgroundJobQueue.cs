@@ -2,7 +2,7 @@
 {
     public interface IBackgroundJobQueue
     {
-        void Enqueue(Func<CancellationToken, Task> taskFactory);
-        Func<CancellationToken, Task>? Dequeue();
+        void Enqueue(Action action);
+        Action? Dequeue();
     }
 }

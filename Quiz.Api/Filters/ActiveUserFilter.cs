@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure.Interfaces;
-using Quiz.Infrastructure.Logging;
 
 namespace Quiz.Api.Filters
 {
@@ -21,25 +20,13 @@ namespace Quiz.Api.Filters
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            try
-            {
-                var email = context.HttpContext.User.FindFirst("user")?.Value ??
-                    throw new AuthenticationException("Brak zalogowanego użytkownika");
+            var email = context.HttpContext.User.FindFirst("user")?.Value ??
+                throw new AuthenticationException("Brak zalogowanego użytkownika");
 
-                var user = await _dataService.GetUserByEmail(email);
+            var user = await _dataService.GetUserByEmail(email);
 
-                if (!user.IsActive)
-                    throw new AuthenticationException($"Użytkownik '{user.Email}' jest nieaktywny");
-            }
-            catch (Exception e)
-            {
-                _logger.Warn(e.Message);
-
-                context.Result = new ObjectResult(e.Message)
-                {
-                    StatusCode = StatusCodes.Status401Unauthorized
-                };
-            }
+            if (!user.IsActive)
+                throw new InactiveUserException($"Użytkownik '{user.Email}' jest nieaktywny");
         }
     }
 

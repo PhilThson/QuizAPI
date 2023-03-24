@@ -53,11 +53,14 @@ internal class Program
         builder.Services.AddScoped<IDocumentService, DocumentService>();
         builder.Services.AddScoped<IRazorRendererService, RazorRendererService>();
 
-        builder.Services.Configure<HostOptions>(config =>
-            config.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore);
+        builder.Services.Configure<HostOptions>(
+            config =>
+                config.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore);
 
         builder.Services.AddHostedService<LoggerBackgroundService>();
         builder.Services.AddSingleton<IBackgroundJobQueue, BackgroundJobQueue>();
+
+        builder.Services.AddSingleton<ILoggerProvider, QuizLoggerProvider>();
 
         //Wykorzystanie biblioteki DinkToPdf jako wrappera na 'wkhtmltopdf'
         //silnika do zamiany kodu html na dokkument PDF
@@ -75,17 +78,12 @@ internal class Program
                 o.Cookie.Name = QuizConstants.UserCookieName;
             });
 
-        builder.Services.AddSingleton<ILoggerProvider, QuizLoggerProvider>();
 
         var app = builder.Build();
 
-        //Zakomentowane - bo były problemy przy uruchamianiu w Dockerze
-        //if (app.Environment.IsDevelopment())
-        //{
         app.UseSwagger();
         app.UseSwaggerUI();
         app.Seed();
-        //}
 
         //app.UseHttpsRedirection();
         app.HandleExceptions();
