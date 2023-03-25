@@ -78,6 +78,7 @@ internal class Program
                 o.Cookie.Name = QuizConstants.UserCookieName;
             });
 
+        builder.Services.AddCors(c => c.AddPolicy("Default", c => c.AllowAnyOrigin()));
 
         var app = builder.Build();
 
@@ -88,10 +89,9 @@ internal class Program
         //app.UseHttpsRedirection();
         app.HandleExceptions();
 
+        app.UseCors("Default");
         app.UseAuthentication();
-
         app.UseAuthorization();
-
         app.MapControllers();
 
         app.Run();
