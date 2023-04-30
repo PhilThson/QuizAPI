@@ -22,6 +22,8 @@ RUN apt-get update && apt-get install -y libgdiplus \
         wget \
         gdebi
 
+COPY ["Quiz.Api.pfx", "/https/Quiz.Api.pfx"]
+
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
