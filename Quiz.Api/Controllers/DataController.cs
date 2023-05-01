@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Quiz.Api.Filters;
 using Quiz.Data.Helpers;
-using Quiz.Infrastructure;
 using Quiz.Infrastructure.Interfaces;
 using Quiz.Shared.DTOs;
 using Quiz.Shared.ViewModels;

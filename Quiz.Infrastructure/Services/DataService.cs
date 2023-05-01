@@ -10,7 +10,6 @@ using Quiz.Infrastructure.Helpers;
 using Quiz.Shared.DTOs;
 using Quiz.Shared.DTOs.Read;
 using Quiz.Shared.ViewModels;
-using System.Net;
 
 namespace Quiz.Infrastructure.Services
 {
@@ -1349,7 +1348,7 @@ namespace Quiz.Infrastructure.Services
             })
             .FirstOrDefaultAsync() ??
             throw new DataNotFoundException("Nie znaleziono użytkownika " +
-                "o podanym identyfikatorze.");
+                $"o podanym identyfikatorze ({userId})");
 
         public async Task<UserDto> GetUserByEmail(string email) =>
             await _dbContext.Uzytkownicy
@@ -1371,7 +1370,7 @@ namespace Quiz.Infrastructure.Services
             })
             .FirstOrDefaultAsync() ??
             throw new DataNotFoundException("Nie znaleziono użytkownika " +
-                "o podanym adresie e-mail.");
+                $"o podanym adresie e-mail ({email})");
 
         public async Task<UserDto> AddUser(CreateUserDto userDto)
         {
@@ -1381,7 +1380,7 @@ namespace Quiz.Infrastructure.Services
 
             if (_dbContext.Uzytkownicy.Any(u => u.Email == userDto.Email))
                 throw new DataValidationException("Podany adres e-mail " +
-                    "jest już zajęty");
+                    $"jest już zajęty ({userDto.Email})");
 
             var user = new Uzytkownik
             {

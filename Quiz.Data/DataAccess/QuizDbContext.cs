@@ -33,6 +33,7 @@ namespace Quiz.Data.DataAccess
         public DbSet<Wynik> Wyniki { get; set; }
         public DbSet<ZestawPytan> ZestawyPytan { get; set; }
         public DbSet<Raport> Raporty { get; set; }
+        public DbSet<Log> Logi { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +43,7 @@ namespace Quiz.Data.DataAccess
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder
                 .LogTo(Console.WriteLine)
-                .EnableDetailedErrors();
+                //.EnableDetailedErrors()
+            ;
     }
 }

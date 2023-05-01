@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Quiz.Data.Helpers
 {
@@ -64,6 +65,23 @@ namespace Quiz.Data.Helpers
                     return false;
             }
             return true;
+        }
+
+        public static string Decrypt(string cipherText)
+        {
+            var parts = cipherText.Split(":");
+            var iv = Convert.FromBase64String(parts[0]);
+            var cipherBytes = Convert.FromBase64String(parts[1]);
+            using (var aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(QuizConstants.QuizApiKey);
+                aes.IV = iv;
+                using (var decryptor = aes.CreateDecryptor())
+                {
+                    var plainBytes = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
+                    return Encoding.UTF8.GetString(plainBytes);
+                }
+            }
         }
     }
 }

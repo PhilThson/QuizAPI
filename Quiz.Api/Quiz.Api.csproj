@@ -26,8 +26,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.14" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.2.2" />
-    <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,7 +60,6 @@
       <Folder Include="Views\" />
       <Folder Include="Utilities\" />
       <Folder Include="CustomMiddleware\" />
-      <Folder Include="Extensions\" />
       <Folder Include="Filters\" />
     </ItemGroup>
     <ItemGroup>

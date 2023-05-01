@@ -1,11 +1,8 @@
 ﻿using System.Security.Claims;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Quiz.Api.Filters;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure.Interfaces;
@@ -19,20 +16,22 @@ namespace Quiz.Api.Controllers
     {
         #region Private fields
         private readonly IDataService _dataService;
+        private readonly ILogger<UserController> _logger;
         #endregion
 
         #region Constructor
-        public UserController(IDataService dataService)
+        public UserController(IDataService dataService, 
+            ILogger<UserController> logger)
         {
             _dataService = dataService;
+            _logger = logger;
         }
         #endregion
-
 
         #region Actions
 
         [HttpGet("login")]
-        public IActionResult Login([FromQuery] string returnUrl = "/")
+        public IActionResult Login()//[FromQuery] string returnUrl = "/")
         {
             //returnUrl - strona/endpoint z ktorego nastapilo przekierowanie
             //Po zalogowaniu można ew. przekierować na stronę z której
@@ -41,8 +40,12 @@ namespace Quiz.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] SimpleUserDto user)
+        public async Task<IActionResult> Login([FromBody] string encryptedUser)
         {
+            SimpleUserDto user = JsonConvert.DeserializeObject<SimpleUserDto>(
+                SecurePasswordHasher.Decrypt(encryptedUser)) ?? 
+                throw new Exception("Nie udało się odszyfrować danych użytkownika");
+
             var userFromDb = await _dataService.GetUserByEmail(user.Email) ??
                 throw new DataNotFoundException(
                     "Nie znaleziono uzytkownika o podanym adresie email");
@@ -60,6 +63,8 @@ namespace Quiz.Api.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
                 });
 
+            //_logger.Info($"Zalogowano użytkownika '{user.Email}'");
+            _logger.LogInformation("Zalogowano użytkownika: {0}", user.Email);
             return Ok("Zalogowano");
         }
 
@@ -85,9 +90,9 @@ namespace Quiz.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById([FromRoute] int userId)
+        public async Task<IActionResult> GetUserById([FromRoute] int id)
         {
-            var user = await _dataService.GetUserById(userId);
+            var user = await _dataService.GetUserById(id);
             return Ok(user);
         }
 

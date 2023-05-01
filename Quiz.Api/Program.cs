@@ -6,112 +6,94 @@ using Quiz.Data.Data;
 using System.Runtime.InteropServices;
 using Quiz.Api.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using NLog;
-using NLog.Web;
 using Quiz.Api.Utilities;
 using DinkToPdf.Contracts;
 using DinkToPdf;
+using Quiz.Infrastructure.Logging;
+using Quiz.Infrastructure.Helpers;
+using Quiz.Data.Helpers;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
-        var logger = NLog.LogManager
-            .Setup()
-            .LoadConfigurationFromAppSettings()
-            .GetCurrentClassLogger();
+        var builder = WebApplication.CreateBuilder(args);
 
-        try
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        // generowanie dokumentów PDF za pomocą RazorView
+        builder.Services.AddMvc().AddControllersAsServices();
 
-            //do generowania dokumentów PDF za pomocą RazorView
-            builder.Services.AddMvc().AddControllersAsServices();
+        // ładowanie zewnętrznych bibliotek
+        var wkHtmlToPdfFileName = "libwkhtmltox";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            wkHtmlToPdfFileName += ".so";
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            wkHtmlToPdfFileName += ".dylib";
 
-            //Ładowanie zewnętrznych bibliotek
-            var wkHtmlToPdfFileName = "libwkhtmltox";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                wkHtmlToPdfFileName += ".so";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                wkHtmlToPdfFileName += ".dylib";
+        var wkHtmlToPdfPath = Path.Combine(
+            new string[] { builder.Environment.ContentRootPath, wkHtmlToPdfFileName });
 
-            var wkHtmlToPdfPath = Path.Combine(
-                new string[] { builder.Environment.ContentRootPath, wkHtmlToPdfFileName });
+        var context = new CustomAssemblyLoadContext();
+        context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(),
+            wkHtmlToPdfPath));
 
-            var context = new CustomAssemblyLoadContext();
-            context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(),
-                wkHtmlToPdfPath));
-
-            //generowanie odpowiedzi Json
-            builder.Services.AddControllers()
-                .AddJsonOptions(o => o.JsonSerializerOptions.DefaultIgnoreCondition
+        builder.Services.AddControllers()
+            .AddJsonOptions(o => o.JsonSerializerOptions.DefaultIgnoreCondition
                 = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull);
 
-            builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddSwaggerGen();
+        builder.Services.AddEndpointsApiExplorer();
 
-            builder.Services.AddDbContext<QuizDbContext>(o =>
-                o.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+        builder.Services.AddSwaggerGen();
 
-            builder.Services.AddScoped<IDataService, DataService>();
-            builder.Services.AddScoped<IDocumentService, DocumentService>();
-            builder.Services.AddScoped<IRazorRendererService, RazorRendererService>();
+        builder.Services.AddDbContext<QuizDbContext>(o =>
+            o.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-            //Wykorzystanie biblioteki DinkToPdf jako wrappera na 'wkhtmltopdf'
-            //silnika do zamiany kodu html na dokkument PDF
-            //wkhtmltopdf - command line tools to render HTML into PDF and various
-            //image formats using the Qt WebKit rendering engine
-            builder.Services.AddSingleton(typeof(IConverter),
-                new SynchronizedConverter(new PdfTools()));
+        builder.Services.AddScoped<IDataService, DataService>();
+        builder.Services.AddScoped<IDocumentService, DocumentService>();
+        builder.Services.AddScoped<IRazorRendererService, RazorRendererService>();
 
-            //bez ustawienia domyślngeo typu/polityki uwierzytelniania,
-            //Authorization Middleware nie wiedzialby, ktora polityke ma testowac
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                //bez podania nazwy, bedzie 'Cookies'
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, o =>
-                {
-                    o.Cookie.HttpOnly = true;
-                    o.LoginPath = "/api/user/login";
-                    o.LogoutPath = "/api/user/logout";
-                    o.Cookie.Name = "quiz-user";
-                });
+        builder.Services.Configure<HostOptions>(
+            config =>
+                config.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore);
 
-            builder.Logging
-                .ClearProviders()
-                .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+        builder.Services.AddHostedService<LoggerBackgroundService>();
+        builder.Services.AddSingleton<IBackgroundJobQueue, BackgroundJobQueue>();
 
-            builder.Host.UseNLog();
+        builder.Services.AddSingleton<ILoggerProvider, QuizLoggerProvider>();
 
-            var app = builder.Build();
+        //Wykorzystanie biblioteki DinkToPdf jako wrappera na 'wkhtmltopdf'
+        //silnika do zamiany kodu html na dokkument PDF
+        //(wkhtmltopdf - command line tools to render HTML into PDF and various
+        //image formats using the Qt WebKit rendering engine)
+        builder.Services.AddSingleton(typeof(IConverter),
+            new SynchronizedConverter(new PdfTools()));
 
-            //Zakomentowane - bo były problemy przy uruchamianiu w Dockerze
-            //if (app.Environment.IsDevelopment())
-            //{
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            app.Seed();
-            //}
+        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, o =>
+            {
+                o.Cookie.HttpOnly = true;
+                o.LoginPath = "/api/user/login";
+                o.LogoutPath = "/api/user/logout";
+                o.Cookie.Name = QuizConstants.UserCookieName;
+            });
 
-            //app.UseHttpsRedirection();
-            app.HandleExceptions();
+        builder.Services.AddCors(c => c.AddPolicy("Default", c => c.AllowAnyOrigin()));
 
-            app.UseAuthentication();
+        var app = builder.Build();
 
-            app.UseAuthorization();
+        app.UseSwagger();
+        app.UseSwaggerUI();
+        app.Seed();
 
-            app.MapControllers();
+        //app.UseHttpsRedirection();
+        app.HandleExceptions();
 
-            app.Run();
-        }
-        catch (Exception ex)
-        {
-            logger.Error(ex);
-            throw;
-        }
-        finally
-        {
-            NLog.LogManager.Shutdown();
-        }
+        app.UseCors("Default");
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapControllers();
+
+        app.Run();
     }
 }
