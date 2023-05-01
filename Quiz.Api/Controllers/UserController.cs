@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Quiz.Api.Filters;
 using Quiz.Data.Helpers;
 using Quiz.Infrastructure.Interfaces;
@@ -30,7 +31,7 @@ namespace Quiz.Api.Controllers
         #region Actions
 
         [HttpGet("login")]
-        public IActionResult Login([FromQuery] string returnUrl = "/")
+        public IActionResult Login()//[FromQuery] string returnUrl = "/")
         {
             //returnUrl - strona/endpoint z ktorego nastapilo przekierowanie
             //Po zalogowaniu można ew. przekierować na stronę z której
@@ -39,8 +40,12 @@ namespace Quiz.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] SimpleUserDto user)
+        public async Task<IActionResult> Login([FromBody] string encryptedUser)
         {
+            SimpleUserDto user = JsonConvert.DeserializeObject<SimpleUserDto>(
+                SecurePasswordHasher.Decrypt(encryptedUser)) ?? 
+                throw new Exception("Nie udało się odszyfrować danych użytkownika");
+
             var userFromDb = await _dataService.GetUserByEmail(user.Email) ??
                 throw new DataNotFoundException(
                     "Nie znaleziono uzytkownika o podanym adresie email");
